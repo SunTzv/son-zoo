@@ -96,64 +96,81 @@
         }
 
         async function loadArchive() {
-            let currentY = startDate.getFullYear();
-            let currentM = startDate.getMonth();
-
-            while (currentY < endDate.getFullYear() || (currentY === endDate.getFullYear() && currentM <= endDate.getMonth())) {
+            try {
+                // Fetch the directory contents directly from the GitHub API! 
+                // This returns instantly with zero 404 spam.
+                const response = await fetch('https://api.github.com/repos/suntzv/suntzv.github.io/contents/assets/daily_pics');
+                if (!response.ok) throw new Error("GitHub API failed");
+                const files = await response.json();
                 
-                const monthDiv = document.createElement('div');
-                monthDiv.className = 'month-section';
-                
-                const monthTitle = document.createElement('h3');
-                monthTitle.textContent = `${months[currentM]} ${currentY}`;
-                monthDiv.appendChild(monthTitle);
-                
-                const daysGrid = document.createElement('div');
-                daysGrid.className = 'days-grid';
-                
-                const daysInMonth = new Date(currentY, currentM + 1, 0).getDate();
-                
-                let hasValidDates = false;
-
-                for (let d = 1; d <= daysInMonth; d++) {
-                    const iterDate = new Date(currentY, currentM, d);
-                    
-                    if (iterDate >= startDate && iterDate <= endDate) {
-                        const yyyy = iterDate.getFullYear();
-                        const mm = String(iterDate.getMonth() + 1).padStart(2, '0');
-                        const dd = String(iterDate.getDate()).padStart(2, '0');
-                        
-                        const imgUrl = `../assets/daily_pics/${dd}_${mm}_${yyyy}.png`;
-                        
-                        // Using new Image() bypasses the strict CORS policy of the file:// protocol!
-                        const exists = await checkImageExists(imgUrl);
-                        
-                        if (exists) {
-                            hasValidDates = true;
-                            const btn = document.createElement('button');
-                            btn.className = 'goofy-btn day-btn';
-                            btn.textContent = String(d).padStart(2, '0');
-                            
-                            const dateStr = `${yyyy}-${mm}-${dd}`;
-                            btn.addEventListener('click', () => {
-                                window.location.href = `index.html?date=${dateStr}`;
+                // Extract valid dates from filenames (DD_MM_YYYY.png)
+                const validDates = [];
+                for (const file of files) {
+                    if (file.name.endsWith('.png')) {
+                        const parts = file.name.replace('.png', '').split('_');
+                        if (parts.length === 3) {
+                            validDates.push({
+                                d: parseInt(parts[0], 10),
+                                m: parseInt(parts[1], 10) - 1,
+                                y: parseInt(parts[2], 10),
+                                str: `${parts[2]}-${parts[1]}-${parts[0]}` // YYYY-MM-DD for URL
                             });
-                            
-                            daysGrid.appendChild(btn);
                         }
                     }
                 }
                 
-                if (hasValidDates) {
-                    monthDiv.appendChild(daysGrid);
-                    calendarContainer.prepend(monthDiv);
+                // Group by Year and Month
+                const grouped = {};
+                for (const dObj of validDates) {
+                    const key = `${dObj.y}-${dObj.m}`;
+                    if (!grouped[key]) grouped[key] = [];
+                    grouped[key].push(dObj);
                 }
                 
-                currentM++;
-                if (currentM > 11) {
-                    currentM = 0;
-                    currentY++;
+                // Render from newest to oldest
+                const keys = Object.keys(grouped).sort((a, b) => {
+                    const [yA, mA] = a.split('-');
+                    const [yB, mB] = b.split('-');
+                    return new Date(yB, mB) - new Date(yA, mA);
+                });
+                
+                for (const key of keys) {
+                    const [yStr, mStr] = key.split('-');
+                    const y = parseInt(yStr, 10);
+                    const m = parseInt(mStr, 10);
+                    
+                    const monthDiv = document.createElement('div');
+                    monthDiv.className = 'month-section';
+                    
+                    const monthTitle = document.createElement('h3');
+                    monthTitle.textContent = `${months[m]} ${y}`;
+                    monthDiv.appendChild(monthTitle);
+                    
+                    const daysGrid = document.createElement('div');
+                    daysGrid.className = 'days-grid';
+                    
+                    // Sort days within the month from oldest to newest (1, 2, 3...)
+                    grouped[key].sort((a, b) => a.d - b.d);
+                    
+                    for (const dObj of grouped[key]) {
+                        const btn = document.createElement('button');
+                        btn.className = 'goofy-btn day-btn';
+                        btn.textContent = String(dObj.d).padStart(2, '0');
+                        
+                        btn.addEventListener('click', () => {
+                            window.location.href = `index.html?date=${dObj.str}`;
+                        });
+                        
+                        daysGrid.appendChild(btn);
+                    }
+                    
+                    monthDiv.appendChild(daysGrid);
+                    calendarContainer.appendChild(monthDiv);
                 }
+                
+            } catch (err) {
+                console.error("Failed to load archive via GitHub API.", err);
+                calendarContainer.innerHTML = "<p>Failed to load archive. Are you offline?</p>";
             }
         }
 
