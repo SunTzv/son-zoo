@@ -1,0 +1,325 @@
+.quickle-page {
+    width: 100vw;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0.75rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.back-button {
+    display: inline-block;
+    padding: 0.45rem 0.85rem;
+    color: var(--ink-black);
+    background: var(--goofy-cyan);
+    border: 4px solid var(--ink-black);
+    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    box-shadow: 5px 5px 0 var(--ink-black);
+    font-family: var(--font-heavy);
+    font-size: 1rem;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.back-button:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0 var(--ink-black);
+}
+
+.quickle-stage {
+    display: grid;
+    place-items: center;
+    min-height: calc(100vh - 3.5rem);
+}
+
+.quickle-shell {
+    width: min(94vw, 1040px);
+    padding: 1rem;
+    box-sizing: border-box;
+    background: #e3faf2;
+    border: 5px solid var(--ink-black);
+    border-radius: 255px 20px 225px 18px/18px 225px 16px 255px;
+    box-shadow: 9px 9px 0 var(--ink-black);
+    transform: rotate(-0.7deg);
+}
+
+.quickle-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.quickle-top h1 {
+    margin: 0;
+    font-size: 3.35rem;
+    transform: rotate(2deg);
+}
+
+.score-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(70px, 1fr));
+    gap: 0.5rem;
+}
+
+.score-strip div,
+.mini-stats span,
+.message {
+    border: 4px solid var(--ink-black);
+    box-shadow: 4px 4px 0 var(--ink-black);
+    background: #ffffff;
+}
+
+.score-strip div {
+    padding: 0.45rem 0.6rem;
+    text-align: center;
+}
+
+.score-strip span,
+.mini-stats span {
+    display: block;
+    font-family: var(--font-heavy);
+    font-size: 0.75rem;
+    font-weight: 900;
+}
+
+.score-strip strong {
+    display: block;
+    font-family: var(--font-heavy);
+    font-size: 1.55rem;
+    line-height: 1;
+}
+
+.game-surface {
+    display: grid;
+    grid-template-columns: min(520px, calc((100vh - 200px) * 0.83)) minmax(190px, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.board {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    gap: 0.45rem;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.45rem;
+}
+
+.tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    background: #ffffff;
+    border: 4px solid var(--ink-black);
+    box-shadow: 4px 4px 0 var(--ink-black);
+    font-family: var(--font-heavy);
+    font-size: 2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.tile.filled {
+    background: var(--goofy-pink);
+    transform: rotate(-1deg);
+}
+
+.tile.correct {
+    background: var(--goofy-green);
+}
+
+.tile.present {
+    background: var(--goofy-yellow);
+}
+
+.tile.absent {
+    color: #ffffff;
+    background: var(--ink-black);
+}
+
+.side-panel {
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    gap: 0.85rem;
+}
+
+.message {
+    min-height: 6rem;
+    padding: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.start-button {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    color: var(--ink-black);
+    background: var(--goofy-pink);
+    border: 5px solid var(--ink-black);
+    border-radius: 50% 20% 40% 10%;
+    box-shadow: 6px 6px 0 var(--ink-black);
+    cursor: pointer;
+    font-family: var(--font-heavy);
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.start-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 2px 2px 0 var(--ink-black);
+}
+
+.mini-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.mini-stats span {
+    padding: 0.55rem;
+    text-align: center;
+}
+
+.shake {
+    animation: shake 0.16s 2;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(-4px);
+    }
+
+    100% {
+        transform: translateX(4px);
+    }
+}
+
+@media (max-width: 760px) {
+    .quickle-shell {
+        transform: none;
+    }
+
+    .quickle-top,
+    .game-surface {
+        grid-template-columns: 1fr;
+    }
+
+    .quickle-top {
+        display: grid;
+    }
+
+    .quickle-top h1 {
+        font-size: 2.35rem;
+    }
+
+    .game-surface {
+        display: grid;
+        grid-template-columns: min(100%, calc((100vh - 380px) * 0.83));
+        justify-content: center;
+    }
+
+    .side-panel {
+        grid-template-rows: auto auto auto;
+    }
+
+    .message {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 430px) {
+    .quickle-page {
+        padding: 0.45rem;
+    }
+
+    .quickle-shell {
+        width: 96vw;
+        padding: 0.7rem;
+    }
+
+    .tile {
+        border-width: 3px;
+        box-shadow: 3px 3px 0 var(--ink-black);
+        font-size: 1.45rem;
+    }
+
+    .score-strip strong {
+        font-size: 1.15rem;
+    }
+}
+
+/* Mobile Keyboard Styles */
+.mobile-keyboard {
+    display: none;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+.kbd-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.kbd-row button {
+    font-family: var(--font-heavy);
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 0.8rem 0.4rem;
+    border: 3px solid var(--ink-black);
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--ink-black);
+    cursor: pointer;
+    flex: 1;
+    max-width: 2.5rem;
+    text-transform: uppercase;
+}
+
+.kbd-row button.kbd-large {
+    flex: 1.5;
+    max-width: 4rem;
+    font-size: 0.9rem;
+}
+
+.kbd-row button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--ink-black);
+}
+
+.kbd-row .spacer {
+    flex: 0.5;
+}
+
+@media (max-width: 760px) {
+    .mobile-keyboard {
+        display: flex;
+    }
+    
+    .side-panel {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 0.5rem;
+    }
+
+    .message {
+        grid-column: 1 / -1;
+    }
+    
+    .game-surface {
+        grid-template-columns: min(100%, calc((100vh - 540px) * 0.83));
+    }
+}
+
+@media (max-width: 430px) {
+    .kbd-row button {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.2rem;
+    }
+}

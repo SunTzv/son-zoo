@@ -1,0 +1,274 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@700;900&display=swap');
+
+:root {
+    --bg-color: #fffdf6;
+    --ink-black: #121212;
+    --goofy-pink: #ff479c;
+    --goofy-yellow: #ffde17;
+    --goofy-cyan: #00e5ff;
+    --goofy-green: #3ddc84;
+    --font-heavy: 'Space Grotesk', sans-serif;
+    --font-goofy: 'Comic Neue', cursive;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--ink-black);
+    font-family: var(--font-goofy);
+    font-size: 1.2rem;
+    padding: 3rem 1rem;
+    overflow-x: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.main-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Wacky Header Section */
+header {
+    text-align: center;
+    margin-bottom: 4rem;
+    position: relative;
+}
+
+h1 {
+    font-family: var(--font-heavy);
+    font-size: 4.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -2px;
+    line-height: 0.9;
+    transform: rotate(-3deg);
+    display: inline-block;
+    background: var(--goofy-yellow);
+    padding: 0.5rem 1.5rem;
+    border: 5px solid var(--ink-black);
+    box-shadow: 8px 8px 0px var(--ink-black);
+    border-radius: 30px 10px 40px 10px;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 1.5rem;
+    display: block;
+}
+
+/* The Interactive Game Grid */
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+    padding: 1rem;
+}
+
+/* Card Component Built Like Cardboard Cutouts */
+.goofy-card {
+    border: 5px solid var(--ink-black);
+    padding: 2rem;
+    text-decoration: none;
+    color: var(--ink-black);
+    position: relative;
+    background: #ffffff;
+
+    /* Creates an uneven, organically hand-cut outline */
+    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    box-shadow: 10px 10px 0px var(--ink-black);
+
+    /* Springy transition physics */
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.5), box-shadow 0.1s ease;
+}
+
+/* Randomly misalign the cards initially so it looks messy */
+.game-grid a:nth-child(1) {
+    transform: rotate(-1.5deg);
+}
+
+.game-grid a:nth-child(2) {
+    transform: rotate(2deg) translateY(-10px);
+}
+
+.game-grid a:nth-child(3) {
+    transform: rotate(-1deg) translateY(10px);
+}
+
+/* The Wobble Infusion */
+.goofy-card:hover {
+    box-shadow: 16px 16px 0px var(--ink-black);
+    animation: cardWobble 0.3s infinite alternate ease-in-out;
+    z-index: 10;
+}
+
+/* Squish down on click */
+.goofy-card:active {
+    transform: scale(0.95) rotate(0deg);
+    box-shadow: 3px 3px 0px var(--ink-black);
+}
+
+.card-banner {
+    font-family: var(--font-heavy);
+    font-size: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    border: 4px solid var(--ink-black);
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    border-radius: 50% 20% 40% 10%;
+}
+
+.card-title {
+    font-family: var(--font-heavy);
+    font-size: 2.2rem;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+}
+
+.card-desc {
+    font-weight: bold;
+    line-height: 1.3;
+}
+
+/* Giant classic blue link text arrow */
+.goofy-arrow {
+    font-size: 2.5rem;
+    color: #0033cc;
+    display: block;
+    margin-top: 1.5rem;
+    text-align: right;
+    transition: transform 0.2s ease;
+}
+
+.goofy-card:hover .goofy-arrow {
+    transform: translateX(8px) scale(1.2);
+}
+
+/* Wacky Keyframe Loops */
+@keyframes cardWobble {
+    0% {
+        transform: scale(1.03) rotate(-2deg);
+    }
+
+    100% {
+        transform: scale(1.03) rotate(3deg);
+    }
+}
+
+footer {
+    text-align: center;
+    margin-top: 6rem;
+    font-weight: bold;
+    font-size: 1.3rem;
+    transform: rotate(0.5deg);
+}
+
+.card-image {
+    width: 100%;
+    height: auto;
+    border: 4px solid var(--ink-black);
+    border-radius: 20px;
+    box-shadow: 4px 4px 0px var(--ink-black);
+    display: block;
+}
+
+/* Bar Magnet Scrollbar */
+::-webkit-scrollbar {
+    width: 18px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-left: 3px solid var(--ink-black);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    background-image:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="40"><text x="9" y="20" fill="white" font-family="sans-serif" font-weight="900" font-size="14" text-anchor="middle" dominant-baseline="middle">N</text></svg>'),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="40"><text x="9" y="20" fill="white" font-family="sans-serif" font-weight="900" font-size="14" text-anchor="middle" dominant-baseline="middle">S</text></svg>'),
+        linear-gradient(to bottom, #ff3333 0%, #ff3333 50%, #3366ff 50%, #3366ff 100%);
+    background-size: 18px 40px, 18px 40px, 100% 100%;
+    background-position: top center, bottom center, center center;
+    background-repeat: no-repeat;
+    border-radius: 0.5px;
+    border-left: 1px solid var(--ink-black);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-image:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="40"><text x="9" y="20" fill="white" font-family="sans-serif" font-weight="900" font-size="14" text-anchor="middle" dominant-baseline="middle">N</text></svg>'),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="40"><text x="9" y="20" fill="white" font-family="sans-serif" font-weight="900" font-size="14" text-anchor="middle" dominant-baseline="middle">S</text></svg>'),
+        linear-gradient(to bottom, #ff1a1a 0%, #ff1a1a 50%, #1a53ff 50%, #1a53ff 100%);
+}
+
+/* Mobile Warning Overlay */
+.mobile-warning-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 71, 156, 0.95);
+    color: var(--ink-black);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.mobile-warning-box {
+    background: #fffdf6;
+    border: 5px solid var(--ink-black);
+    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    box-shadow: 12px 12px 0 var(--ink-black);
+    padding: 2rem;
+    max-width: 400px;
+    transform: rotate(-2deg);
+}
+
+.mobile-warning-box h2 {
+    font-family: var(--font-heavy);
+    font-size: 2rem;
+    font-weight: 900;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.mobile-warning-box p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0 0 1.5rem 0;
+}
+
+.mobile-warning-btn {
+    font-family: var(--font-heavy);
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 0.8rem 1.5rem;
+    background: var(--goofy-yellow);
+    border: 4px solid var(--ink-black);
+    border-radius: 10px;
+    box-shadow: 4px 4px 0 var(--ink-black);
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 1rem;
+}
+
+.mobile-warning-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--ink-black);
+}
+
+@media (max-width: 760px) {
+    .mobile-warning-overlay {
+        display: flex;
+    }
+}

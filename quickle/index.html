@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Son.zoo</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="quickle.css">
+</head>
+
+<body class="quickle-page">
+    <a href="../index.html" class="back-button">← GO BACK</a>
+
+    <main class="quickle-stage">
+        <section class="quickle-shell">
+            <div class="quickle-top">
+                <div>
+
+                    <h1>QUICKLE BLITZ</h1>
+                </div>
+                <div class="score-strip" aria-label="Game stats">
+                    <div>
+                        <span>TIME</span>
+                        <strong id="time">60.0</strong>
+                    </div>
+                    <div>
+                        <span>SOLVED</span>
+                        <strong id="solved">0</strong>
+                    </div>
+                    <div>
+                        <span>AVG</span>
+                        <strong id="average">--</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-surface">
+                <div id="board" class="board" aria-label="Quickle guesses"></div>
+
+                <aside class="side-panel">
+                    <div id="message" class="message">Blitz wordles. Any 5 letters count.</div>
+                    <button id="start-button" class="start-button" type="button">START</button>
+                    <div class="mini-stats">
+                        <span>Streak <strong id="streak">0</strong></span>
+                        <span>Best <strong id="best">--</strong></span>
+                    </div>
+                </aside>
+            </div>
+
+            <div id="mobile-keyboard" class="mobile-keyboard">
+                <div class="kbd-row">
+                    <button data-key="q">Q</button><button data-key="w">W</button><button data-key="e">E</button><button
+                        data-key="r">R</button><button data-key="t">T</button><button data-key="y">Y</button><button
+                        data-key="u">U</button><button data-key="i">I</button><button data-key="o">O</button><button
+                        data-key="p">P</button>
+                </div>
+                <div class="kbd-row">
+                    <div class="spacer"></div><button data-key="a">A</button><button data-key="s">S</button><button
+                        data-key="d">D</button><button data-key="f">F</button><button data-key="g">G</button><button
+                        data-key="h">H</button><button data-key="j">J</button><button data-key="k">K</button><button
+                        data-key="l">L</button>
+                    <div class="spacer"></div>
+                </div>
+                <div class="kbd-row">
+                    <button data-key="Enter" class="kbd-large">ENT</button><button data-key="z">Z</button><button
+                        data-key="x">X</button><button data-key="c">C</button><button data-key="v">V</button><button
+                        data-key="b">B</button><button data-key="n">N</button><button data-key="m">M</button><button
+                        data-key="Backspace" class="kbd-large">⌫</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../site.js"></script>
+    <script src="wordlist.js"></script>
+    <script src="quickle.js"></script>
+</body>
+
+</html>
