@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Son.zoo</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="picsgobrrr.css">
+    <style>
+        .archive-panel {
+            background: var(--paper-white);
+            padding: 3rem;
+            border: 6px solid var(--ink-black);
+            border-radius: 15px 255px 15px 225px/225px 15px 255px 15px;
+            box-shadow: 10px 10px 0 var(--ink-black);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .archive-panel h2 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--goofy-magenta);
+        }
+
+        .archive-input {
+            font-size: 1.5rem;
+            padding: 1rem;
+            font-family: var(--font-heavy);
+        }
+
+        #calendar-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .month-section {
+            text-align: center;
+        }
+
+        .month-section h3 {
+            font-size: 1.8rem;
+            margin: 0 0 1rem 0;
+            text-transform: uppercase;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .day-btn {
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+    </style>
+</head>
+
+<body class="pics-page">
+    <a href="index.html" class="back-button">← BACK TO GAME</a>
+
+    <header class="game-header">
+        <h1>ARCHIVE</h1>
+    </header>
+
+    <main class="game-container">
+        <div class="archive-panel">
+            <h2>ARCHIVE</h2>
+            <div id="calendar-container"></div>
+        </div>
+    </main>
+
+    <script>
+        const calendarContainer = document.getElementById('calendar-container');
+
+        // Scanning from Jan 1, 2025 so older images (like your 15 Dec 2025 test) will be found!
+        const startDate = new Date(2025, 0, 1); 
+        const today = new Date();
+        const endDate = today < startDate ? startDate : today;
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        function checkImageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        async function loadArchive() {
+            let currentY = startDate.getFullYear();
+            let currentM = startDate.getMonth();
+
+            while (currentY < endDate.getFullYear() || (currentY === endDate.getFullYear() && currentM <= endDate.getMonth())) {
+                
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'month-section';
+                
+                const monthTitle = document.createElement('h3');
+                monthTitle.textContent = `${months[currentM]} ${currentY}`;
+                monthDiv.appendChild(monthTitle);
+                
+                const daysGrid = document.createElement('div');
+                daysGrid.className = 'days-grid';
+                
+                const daysInMonth = new Date(currentY, currentM + 1, 0).getDate();
+                
+                let hasValidDates = false;
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const iterDate = new Date(currentY, currentM, d);
+                    
+                    if (iterDate >= startDate && iterDate <= endDate) {
+                        const yyyy = iterDate.getFullYear();
+                        const mm = String(iterDate.getMonth() + 1).padStart(2, '0');
+                        const dd = String(iterDate.getDate()).padStart(2, '0');
+                        
+                        const imgUrl = `../assets/daily_pics/${dd}_${mm}_${yyyy}.png`;
+                        
+                        // Using new Image() bypasses the strict CORS policy of the file:// protocol!
+                        const exists = await checkImageExists(imgUrl);
+                        
+                        if (exists) {
+                            hasValidDates = true;
+                            const btn = document.createElement('button');
+                            btn.className = 'goofy-btn day-btn';
+                            btn.textContent = String(d).padStart(2, '0');
+                            
+                            const dateStr = `${yyyy}-${mm}-${dd}`;
+                            btn.addEventListener('click', () => {
+                                window.location.href = `index.html?date=${dateStr}`;
+                            });
+                            
+                            daysGrid.appendChild(btn);
+                        }
+                    }
+                }
+                
+                if (hasValidDates) {
+                    monthDiv.appendChild(daysGrid);
+                    calendarContainer.prepend(monthDiv);
+                }
+                
+                currentM++;
+                if (currentM > 11) {
+                    currentM = 0;
+                    currentY++;
+                }
+            }
+        }
+
+        loadArchive();
+    </script>
+</body>
+
+</html>

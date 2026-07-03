@@ -9,31 +9,6 @@
     flex-direction: column;
 }
 
-.back-button {
-    align-self: flex-start;
-    padding: 0.45rem 0.85rem;
-    color: var(--ink-black);
-    background: var(--goofy-cyan);
-    border: 4px solid var(--ink-black);
-    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-    box-shadow: 5px 5px 0 var(--ink-black);
-    font-family: var(--font-heavy);
-    font-size: 1rem;
-    font-weight: 900;
-    text-decoration: none;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.back-button:hover {
-    transform: rotate(-2deg) translateY(-2px);
-    box-shadow: 8px 8px 0 var(--ink-black);
-}
-
-.back-button:active {
-    transform: translate(3px, 3px);
-    box-shadow: 2px 2px 0 var(--ink-black);
-}
-
 .whatif-stage {
     flex: 1;
     display: flex;
