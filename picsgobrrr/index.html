@@ -31,7 +31,14 @@
                 <span class="checkbox-label">NUMBERS</span>
             </label>
 
+            <label class="custom-checkbox-wrapper">
+                <input type="checkbox" id="toggle-challenge">
+                <span class="custom-checkmark"></span>
+                <span class="checkbox-label" style="color: var(--goofy-pink);">CHALLENGE MODE</span>
+            </label>
+
             <button id="shuffle-btn" class="goofy-btn">SHUFFLE & START</button>
+            <button id="auto-solve-btn" class="goofy-btn hidden" style="background-color: var(--goofy-pink); color: #fff;">AUTO SOLVE</button>
         </div>
 
         <div class="board-wrapper">
@@ -43,8 +50,13 @@
             </div>
             <div id="win-overlay" class="overlay hidden">
                 <h2>YOU DID IT!</h2>
-                <p>Picture is fixed.</p>
+                <p id="win-message">Picture is fixed.</p>
                 <button id="play-again-btn" class="goofy-btn">PLAY AGAIN</button>
+            </div>
+
+            <div class="hud-panel">
+                <div id="moves-counter">MOVES: 0</div>
+                <div id="target-counter" class="hidden">TARGET: --</div>
             </div>
 
             <div id="puzzle-board" class="puzzle-board show-numbers">

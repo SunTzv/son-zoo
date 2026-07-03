@@ -45,7 +45,9 @@
     gap: 1.5rem;
     justify-content: center;
     align-items: center;
-    background: var(--paper-white);
+    background: rgba(255, 253, 246, 0.85); /* Slightly transparent for elegance */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: 1rem 2rem;
     border: 4px solid var(--ink-black);
     border-radius: 15px 255px 15px 225px/225px 15px 255px 15px;
@@ -108,6 +110,39 @@
     background-color: var(--paper-white);
     box-shadow: 10px 10px 0 var(--ink-black);
     overflow: hidden;
+}
+
+.hud-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    box-sizing: border-box;
+    z-index: 5;
+    pointer-events: none;
+}
+
+#moves-counter, #target-counter {
+    background: rgba(255, 255, 255, 0.9);
+    border: 3px solid var(--ink-black);
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-family: var(--font-heavy);
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--ink-black);
+    box-shadow: 3px 3px 0 var(--ink-black);
+}
+
+#target-counter {
+    color: var(--goofy-pink);
+}
+
+#target-counter.hidden {
+    display: none;
 }
 
 .puzzle-board {
@@ -197,7 +232,7 @@
 
 #win-overlay h2 {
     font-size: 3rem;
-    color: var(--goofy-magenta);
+    color: var(--goofy-pink);
     margin: 0 0 1rem 0;
     text-shadow: 3px 3px 0 var(--ink-black);
     transform: rotate(-3deg);

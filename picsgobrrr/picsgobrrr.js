@@ -2,6 +2,8 @@ const datePicker = document.getElementById('date-picker');
 const gridBtn = document.getElementById('grid-btn');
 const toggleNumbers = document.getElementById('toggle-numbers');
 const shuffleBtn = document.getElementById('shuffle-btn');
+const autoSolveBtn = document.getElementById('auto-solve-btn');
+const playAgainBtn = document.getElementById('play-again-btn');
 
 const puzzleBoard = document.getElementById('puzzle-board');
 const loadingOverlay = document.getElementById('loading-overlay');
@@ -12,6 +14,9 @@ let currentImage = null;
 let grid = 4;
 let tiles = []; // 1D array representing the board. 0 is empty.
 let emptyIndex = -1; // Index in the 1D array
+let movesCount = 0;
+let targetMoves = -1;
+let isChallengeMode = false;
 
 // Use URL param for date, otherwise today
 const urlParams = new URLSearchParams(window.location.search);
@@ -54,13 +59,48 @@ function initGame() {
         currentImage = imgUrl;
         loadingOverlay.classList.add('hidden');
         setupBoard();
+        
+        
+        isChallengeMode = document.getElementById('toggle-challenge').checked;
+        movesCount = 0;
+        targetMoves = -1;
+        updateHUD();
+        
         shuffleBoard();
+        
+        if (isChallengeMode) {
+            let pathResult = solvePuzzle(tiles, grid);
+            if (pathResult && pathResult.length > 0) {
+                targetMoves = pathResult.length;
+                optimalPath = pathResult;
+                autoSolveBtn.classList.remove('hidden');
+            } else {
+                targetMoves = -1;
+                optimalPath = null;
+                autoSolveBtn.classList.add('hidden');
+            }
+            updateHUD();
+        } else {
+            autoSolveBtn.classList.add('hidden');
+        }
     };
     img.onerror = () => {
         loadingOverlay.classList.add('hidden');
         errorOverlay.classList.remove('hidden');
     };
     img.src = imgUrl;
+}
+
+function updateHUD() {
+    document.getElementById('moves-counter').innerText = `MOVES: ${movesCount}`;
+    const targetEl = document.getElementById('target-counter');
+    
+    if (isChallengeMode && targetMoves > -1) {
+        targetEl.innerText = `TARGET: ${targetMoves}`;
+        targetEl.classList.remove('hidden');
+    } else {
+        targetEl.classList.add('hidden');
+    }
 }
 
 function setupBoard() {
@@ -143,6 +183,12 @@ function handleTileClick(tileNumber) {
         tiles[tileIndex] = 0;
         emptyIndex = tileIndex;
         
+        movesCount++;
+        updateHUD();
+        
+        // Hide auto solve if user makes a move manually
+        autoSolveBtn.classList.add('hidden');
+        
         renderBoard();
         checkWin();
     }
@@ -164,7 +210,8 @@ function canMove(index) {
 function shuffleBoard() {
     // Instead of random generation (which might be unsolvable), 
     // we make random valid moves backwards from the solved state.
-    let moves = grid * grid * 10; // More moves for larger grids
+    // In challenge mode, we limit the depth so the IDA* solver can find the shortest path instantly without freezing the browser.
+    let moves = isChallengeMode ? Math.min(25, grid * grid * 2) : grid * grid * 10; 
     
     let lastMoved = -1;
     
@@ -202,6 +249,21 @@ function checkWin() {
         }
     }
     if (won && tiles[tiles.length - 1] === 0) {
+        // Customize Win Message based on mode!
+        const winMsg = document.getElementById('win-message');
+        if (isChallengeMode && targetMoves > -1) {
+            if (movesCount <= targetMoves) {
+                winMsg.innerHTML = `FLAWLESS VICTORY!<br>You matched the mathematically perfect path (${movesCount} moves)!`;
+                winMsg.style.color = 'var(--goofy-cyan)';
+            } else {
+                winMsg.innerHTML = `Solved in ${movesCount} moves.<br>(Optimal was ${targetMoves}. Can you do better?)`;
+                winMsg.style.color = 'var(--ink-black)';
+            }
+        } else {
+            winMsg.innerHTML = `Solved in ${movesCount} moves!`;
+            winMsg.style.color = 'var(--ink-black)';
+        }
+
         // WIN SEQUENCE
         setTimeout(() => {
             // 1. Glow border on sliding pieces
@@ -231,6 +293,7 @@ function checkWin() {
             setTimeout(() => {
                 puzzleBoard.classList.add('seamless');
                 spawnButterflies();
+                winOverlay.classList.remove('hidden');
             }, 1000);
             
         }, 200);
@@ -277,6 +340,37 @@ function hideAllOverlays() {
 
 // Event Listeners
 shuffleBtn.addEventListener('click', initGame);
+playAgainBtn.addEventListener('click', initGame);
+
+autoSolveBtn.addEventListener('click', () => {
+    if (!optimalPath || optimalPath.length === 0) return;
+    
+    // Hide buttons during animation
+    autoSolveBtn.classList.add('hidden');
+    shuffleBtn.classList.add('hidden');
+    
+    let step = 0;
+    const interval = setInterval(() => {
+        if (step >= optimalPath.length) {
+            clearInterval(interval);
+            shuffleBtn.classList.remove('hidden');
+            return;
+        }
+        
+        // optimalPath[step] contains the index where the empty space needs to move.
+        // We find the tile currently at that index and 'click' it.
+        const targetIdx = optimalPath[step];
+        const tileNumber = tiles[targetIdx];
+        
+        if (tileNumber) {
+            handleTileClick(tileNumber);
+            // Re-show auto solve if handleTileClick hid it, since we're in auto mode
+            // Actually, handleTileClick hides it, which is fine, we don't need it visible while solving.
+        }
+        
+        step++;
+    }, 250); // 250ms per move
+});
 
 gridBtn.addEventListener('click', () => {
     let curr = parseInt(gridBtn.dataset.grid);
@@ -297,3 +391,87 @@ toggleNumbers.addEventListener('change', (e) => {
 
 // Start game initially
 initGame();
+
+// --- IDA* SOLVER ENGINE ---
+
+const DIRS = [
+    {dx: 0, dy: -1}, // 0: Up
+    {dx: 1, dy: 0},  // 1: Right
+    {dx: 0, dy: 1},  // 2: Down
+    {dx: -1, dy: 0}  // 3: Left
+];
+
+function getManhattan(state, size) {
+    let dist = 0;
+    for (let i = 0; i < state.length; i++) {
+        if (state[i] !== 0) {
+            let targetX = (state[i] - 1) % size;
+            let targetY = Math.floor((state[i] - 1) / size);
+            let currentX = i % size;
+            let currentY = Math.floor(i / size);
+            dist += Math.abs(targetX - currentX) + Math.abs(targetY - currentY);
+        }
+    }
+    return dist;
+}
+
+let optimalPath = null;
+
+function solvePuzzle(startState, size) {
+    let state = [...startState];
+    let bound = getManhattan(state, size);
+    let emptyIdx = state.indexOf(0);
+    optimalPath = null;
+    
+    // Iterative Deepening A*
+    while (true) {
+        let t = search(state, 0, bound, size, emptyIdx, -1, []);
+        if (t === "FOUND") return optimalPath; 
+        if (t > 50 || t === -1) return null; // Fallback to prevent freezing if too deep
+        bound = t;
+    }
+}
+
+function search(state, g, bound, size, emptyIdx, lastDir, path) {
+    let h = getManhattan(state, size);
+    let f = g + h;
+    if (f > bound) return f;
+    if (h === 0) {
+        optimalPath = [...path];
+        return "FOUND";
+    }
+    
+    let min = Infinity;
+    let emptyX = emptyIdx % size;
+    let emptyY = Math.floor(emptyIdx / size);
+    
+    for (let d = 0; d < 4; d++) {
+        // Prevent reverse move
+        if (lastDir !== -1 && Math.abs(lastDir - d) === 2) continue;
+        
+        let nx = emptyX + DIRS[d].dx;
+        let ny = emptyY + DIRS[d].dy;
+        
+        if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
+            let nIdx = ny * size + nx;
+            
+            // Swap
+            let temp = state[emptyIdx];
+            state[emptyIdx] = state[nIdx];
+            state[nIdx] = temp;
+            
+            path.push(nIdx);
+            let t = search(state, g + 1, bound, size, nIdx, d, path);
+            if (t === "FOUND") return "FOUND";
+            path.pop();
+            
+            if (t < min) min = t;
+            
+            // Backtrack
+            temp = state[emptyIdx];
+            state[emptyIdx] = state[nIdx];
+            state[nIdx] = temp;
+        }
+    }
+    return min;
+}
