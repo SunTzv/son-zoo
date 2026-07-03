@@ -7,7 +7,7 @@ const timelineContainer = document.getElementById('timeline-container');
 const timelineTitle = document.getElementById('timeline-title');
 
 // IMPORTANT: Replace this with your actual Vercel URL once you deploy the backend!
-const VERCEL_API_URL = "https://your-project-name.vercel.app/api/whatif";
+const VERCEL_API_URL = "https://suntzv-github-6d17bpmeg-imrishabh-ofcs-projects.vercel.app/api/whatif";
 
 // If running locally, hit the local dev server. If on GitHub Pages, hit Vercel!
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
