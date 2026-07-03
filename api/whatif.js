@@ -36,7 +36,8 @@ Each object must have:
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${process.env.WHAT_IF_KEY}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             },
             body: JSON.stringify({
                 model: 'openai/gpt-oss-20b', 
