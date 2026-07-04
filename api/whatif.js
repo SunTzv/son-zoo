@@ -40,7 +40,7 @@ Each object must have:
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             },
             body: JSON.stringify({
-                model: 'openai/gpt-oss-20b', 
+                model: 'openai/gpt-oss-20b', // Restored your model!
                 messages: [
                     { role: 'system', content: SYSTEM_PROMPT },
                     { role: 'user', content: `What if ${prompt}` }
@@ -51,7 +51,7 @@ Each object must have:
 
         if (!response.ok) {
             const errBody = await response.text();
-            throw new Error(`API error: ${response.status} ${errBody}`);
+            throw new Error(`Groq API rejected the request: ${response.status} ${errBody}`);
         }
 
         const data = await response.json();
@@ -68,10 +68,15 @@ Each object must have:
             jsonStr = match[0];
         }
 
-        const events = JSON.parse(jsonStr);
-        return res.status(200).json(events);
+        try {
+            const events = JSON.parse(jsonStr);
+            return res.status(200).json(events);
+        } catch (parseError) {
+            throw new Error(`LLM generated invalid JSON: ${parseError.message}. Raw Output: ${jsonStr}`);
+        }
     } catch (error) {
-        console.error('API Error:', error);
-        return res.status(500).json({ error: 'Failed to generate timeline' });
+        console.error('API Error:', error.message);
+        // Return the exact error message so the frontend can see WHY it failed!
+        return res.status(500).json({ error: 'Failed to generate timeline', details: error.message });
     }
 }

@@ -35,7 +35,12 @@ async function simulateTimeline(promptText) {
         });
         
         if (!response.ok) {
-            throw new Error('API failed');
+            let errorMsg = 'API failed';
+            try {
+                const errJson = await response.json();
+                if (errJson.details) errorMsg = errJson.details;
+            } catch (e) {}
+            throw new Error(`API failed: ${errorMsg}`);
         }
 
         events = await response.json();
