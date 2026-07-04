@@ -335,3 +335,9 @@ footer {
     background: #e5faff;
     font-weight: 900;
 }
+
+/* --- Site-Wide Hide Cursor --- */
+body.hide-cursor,
+body.hide-cursor * {
+    cursor: none !important;
+}
