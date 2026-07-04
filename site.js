@@ -69,6 +69,18 @@ function initContextMenu() {
     setInterval(() => {
         debugger;
     }, 100);
+
+    // Site-wide Favicon
+    if (!document.querySelector("link[rel='icon']")) {
+        const favicon = document.createElement("link");
+        favicon.rel = "icon";
+        favicon.type = "image/gif";
+        // Calculate relative path to root assets folder based on current depth
+        const depth = window.location.pathname.split('/').length - 2;
+        const prefix = depth > 0 ? '../'.repeat(depth) : './';
+        favicon.href = `${prefix}assets/cat.gif`;
+        document.head.appendChild(favicon);
+    }
 }
 function addMobileWarning() {
     if (!document.querySelector(".mobile-warning-overlay")) {
