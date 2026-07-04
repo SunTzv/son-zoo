@@ -4,3 +4,6 @@ node_modules/
 .DS_Store
 ideas.txt
 dev_server.py
+test_ida.js
+test_parse.js
+test.js

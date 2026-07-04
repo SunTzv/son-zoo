@@ -277,6 +277,23 @@
     background-color: var(--goofy-yellow);
 }
 
+#grid-btn:hover::after, #auto-solve-btn:hover::after {
+    content: " (CLICK ME!)";
+    font-size: 0.8rem;
+    position: absolute;
+    top: -15px;
+    right: -10px;
+    background: var(--goofy-yellow);
+    border: 2px solid var(--ink-black);
+    padding: 2px 5px;
+    transform: rotate(10deg);
+}
+
+#auto-solve-btn:hover::after {
+    content: " (I'M WEAK!)";
+    color: var(--ink-black);
+}
+
 .custom-checkmark:after {
     content: "";
     position: absolute;

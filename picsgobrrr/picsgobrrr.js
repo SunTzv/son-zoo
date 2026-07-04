@@ -16,7 +16,7 @@ let tiles = []; // 1D array representing the board. 0 is empty.
 let emptyIndex = -1; // Index in the 1D array
 let movesCount = 0;
 let targetMoves = -1;
-let isChallengeMode = false;
+let autoSolveUsed = false;
 
 // Use URL param for date, otherwise today
 const urlParams = new URLSearchParams(window.location.search);
@@ -60,16 +60,17 @@ function initGame() {
         loadingOverlay.classList.add('hidden');
         setupBoard();
         
-        
-        isChallengeMode = document.getElementById('toggle-challenge').checked;
+        autoSolveUsed = false;
         movesCount = 0;
         targetMoves = -1;
         updateHUD();
         
         shuffleBoard();
         
-        if (isChallengeMode) {
+        // Yield to browser to paint the shuffled board before running the heavy IDA* math engine
+        setTimeout(() => {
             let pathResult = solvePuzzle(tiles, grid);
+            
             if (pathResult && pathResult.length > 0) {
                 targetMoves = pathResult.length;
                 optimalPath = pathResult;
@@ -80,9 +81,7 @@ function initGame() {
                 autoSolveBtn.classList.add('hidden');
             }
             updateHUD();
-        } else {
-            autoSolveBtn.classList.add('hidden');
-        }
+        }, 50);
     };
     img.onerror = () => {
         loadingOverlay.classList.add('hidden');
@@ -95,7 +94,7 @@ function updateHUD() {
     document.getElementById('moves-counter').innerText = `MOVES: ${movesCount}`;
     const targetEl = document.getElementById('target-counter');
     
-    if (isChallengeMode && targetMoves > -1) {
+    if (targetMoves > -1) {
         targetEl.innerText = `TARGET: ${targetMoves}`;
         targetEl.classList.remove('hidden');
     } else {
@@ -208,10 +207,10 @@ function canMove(index) {
 }
 
 function shuffleBoard() {
-    // Instead of random generation (which might be unsolvable), 
-    // we make random valid moves backwards from the solved state.
-    // In challenge mode, we limit the depth so the IDA* solver can find the shortest path instantly without freezing the browser.
-    let moves = isChallengeMode ? Math.min(25, grid * grid * 2) : grid * grid * 10; 
+    // Deep shuffle! For 4x4, 60 moves guarantees a mathematically perfect optimal path around 40-50 moves.
+    let moves = 100;
+    if (grid === 4) moves = 60;
+    if (grid === 5) moves = 40;
     
     let lastMoved = -1;
     
@@ -251,7 +250,10 @@ function checkWin() {
     if (won && tiles[tiles.length - 1] === 0) {
         // Customize Win Message based on mode!
         const winMsg = document.getElementById('win-message');
-        if (isChallengeMode && targetMoves > -1) {
+        if (autoSolveUsed) {
+            winMsg.innerHTML = `AUTO-SOLVED!<br>(No credit for you!)`;
+            winMsg.style.color = 'var(--goofy-pink)';
+        } else if (targetMoves > -1) {
             if (movesCount <= targetMoves) {
                 winMsg.innerHTML = `FLAWLESS VICTORY!<br>You matched the mathematically perfect path (${movesCount} moves)!`;
                 winMsg.style.color = 'var(--goofy-cyan)';
@@ -345,6 +347,8 @@ playAgainBtn.addEventListener('click', initGame);
 autoSolveBtn.addEventListener('click', () => {
     if (!optimalPath || optimalPath.length === 0) return;
     
+    autoSolveUsed = true;
+    
     // Hide buttons during animation
     autoSolveBtn.classList.add('hidden');
     shuffleBtn.classList.add('hidden');
@@ -401,6 +405,39 @@ const DIRS = [
     {dx: -1, dy: 0}  // 3: Left
 ];
 
+function getLinearConflict(state, size) {
+    let conflict = 0;
+    // Row conflicts
+    for (let r = 0; r < size; r++) {
+        for (let c1 = 0; c1 < size; c1++) {
+            let t1 = state[r * size + c1];
+            if (t1 !== 0 && Math.floor((t1 - 1) / size) === r) {
+                for (let c2 = c1 + 1; c2 < size; c2++) {
+                    let t2 = state[r * size + c2];
+                    if (t2 !== 0 && Math.floor((t2 - 1) / size) === r) {
+                        if (t1 > t2) conflict += 2;
+                    }
+                }
+            }
+        }
+    }
+    // Col conflicts
+    for (let c = 0; c < size; c++) {
+        for (let r1 = 0; r1 < size; r1++) {
+            let t1 = state[r1 * size + c];
+            if (t1 !== 0 && (t1 - 1) % size === c) {
+                for (let r2 = r1 + 1; r2 < size; r2++) {
+                    let t2 = state[r2 * size + c];
+                    if (t2 !== 0 && (t2 - 1) % size === c) {
+                        if (t1 > t2) conflict += 2;
+                    }
+                }
+            }
+        }
+    }
+    return conflict;
+}
+
 function getManhattan(state, size) {
     let dist = 0;
     for (let i = 0; i < state.length; i++) {
@@ -416,27 +453,38 @@ function getManhattan(state, size) {
 }
 
 let optimalPath = null;
+let idaIterations = 0;
 
 function solvePuzzle(startState, size) {
     let state = [...startState];
-    let bound = getManhattan(state, size);
+    let bound = getManhattan(state, size) + getLinearConflict(state, size);
     let emptyIdx = state.indexOf(0);
     optimalPath = null;
+    idaIterations = 0;
+    
+    // Increased max iterations because Linear Conflict pruning is incredibly strong
+    let maxIterations = 5000000;
     
     // Iterative Deepening A*
     while (true) {
-        let t = search(state, 0, bound, size, emptyIdx, -1, []);
+        let t = search(state, 0, bound, size, emptyIdx, -1, [], maxIterations);
         if (t === "FOUND") return optimalPath; 
+        if (t === "TIMEOUT") return "TIMEOUT";
         if (t > 50 || t === -1) return null; // Fallback to prevent freezing if too deep
         bound = t;
     }
 }
 
-function search(state, g, bound, size, emptyIdx, lastDir, path) {
-    let h = getManhattan(state, size);
+function search(state, g, bound, size, emptyIdx, lastDir, path, maxIterations) {
+    idaIterations++;
+    if (idaIterations > maxIterations) return "TIMEOUT";
+    
+    let h = getManhattan(state, size) + getLinearConflict(state, size);
     let f = g + h;
     if (f > bound) return f;
-    if (h === 0) {
+    
+    // Check if fully solved (Manhattan is 0)
+    if (h === 0 || getManhattan(state, size) === 0) {
         optimalPath = [...path];
         return "FOUND";
     }
@@ -461,8 +509,9 @@ function search(state, g, bound, size, emptyIdx, lastDir, path) {
             state[nIdx] = temp;
             
             path.push(nIdx);
-            let t = search(state, g + 1, bound, size, nIdx, d, path);
+            let t = search(state, g + 1, bound, size, nIdx, d, path, maxIterations);
             if (t === "FOUND") return "FOUND";
+            if (t === "TIMEOUT") return "TIMEOUT";
             path.pop();
             
             if (t < min) min = t;
