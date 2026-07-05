@@ -135,21 +135,39 @@ Return ONLY a raw JSON object with exactly two keys:
             ...history.slice(-3) // only need recent context
         ];
 
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.GEMMA_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'gemma-4-31b-it',
-                messages: messages,
-                temperature: 0.7,
-                max_tokens: 2048
-            })
-        });
+        let response, data;
+        const maxRetries = 3;
+        
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${process.env.GEMMA_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'gemma-4-31b-it',
+                        messages: messages,
+                        temperature: 0.7,
+                        max_tokens: 2048
+                    })
+                });
 
-        const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                data = await response.json();
+                break; // Success
+            } catch (err) {
+                console.error(`[ERROR] Chat Attempt ${attempt + 1} failed:`, err);
+                if (attempt === maxRetries - 1) {
+                    throw err;
+                }
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
         let jsonStr = data.choices[0].message.content.trim();
         jsonStr = jsonStr.replace(/<thought>[\s\S]*?<\/thought>/g, '').trim();
 
