@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gas is Lighter - Son.zoo</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="gaslighter.css">
+    <!-- Using a nice Google font for a clean UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="gaslighter-page">
+    <a href="../index.html" class="back-button">← BACK</a>
+    <button id="help-btn" class="help-btn">?</button>
+
+    <div id="help-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>How to Play</h2>
+            <p>Welcome to <strong>Gas is Lighter</strong>.</p>
+            <p>You are faced with a terribly drawn MS Paint image.</p>
+            <p>Your goal is to convince the Grumpy Professor (an AI) that the drawing is actually the <strong>Target Object</strong>.</p>
+            <p><strong>The Confidence Meter:</strong> Watch the time of day! The game starts in the Morning (100% Professor Confidence). As you wear him down, the sky turns to Night (0% Confidence). Make it Night before you run out of attempts to win!</p>
+            <p>You have exactly <strong>5 attempts</strong>.</p>
+            <button id="close-help-btn" class="close-help-btn">Got it</button>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="game-over-title">Game Over</h2>
+            <p id="game-over-message">You ran out of attempts.</p>
+            <button id="play-again-btn" class="start-game-btn" style="margin-top: 20px;">Play Again</button>
+            <button id="main-menu-btn" class="start-game-btn" style="margin-top: 10px; background-color: #555;">Main Menu</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="start-screen">
+            <h1>GAS IS LIGHTER</h1>
+            <p>A game of pure persuasion.</p>
+            <button id="start-game-btn" class="start-game-btn">START NEW GAME</button>
+        </div>
+
+        <!-- Loading Screen with Mini-game -->
+        <div id="loading-screen" class="start-screen hidden">
+            <h2>Professor is setting up...</h2>
+            <p>The Professor's dial-up modem is currently connecting to the mainframe... this may take up to a minute!</p>
+            <p style="margin-bottom: 20px;">While you wait, try to catch his misplaced glasses!</p>
+            <div class="glasses-game" style="position: relative; width: 300px; height: 300px; margin: 0 auto; border: 2px dashed #ccc; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.02);">
+                <button id="glasses-btn" style="position: absolute; top: 130px; left: 130px; font-size: 40px; background: none; border: none; cursor: pointer; transition: top 0.1s, left 0.1s; padding: 0;">👓</button>
+            </div>
+            <div style="font-size: 1.2rem; font-weight: bold; margin-top: 15px;">Glasses caught: <span id="glasses-counter">0</span></div>
+        </div>
+
+        <!-- Main Game Screen -->
+        <div id="game-screen" class="game-screen hidden">
+            <!-- Confidence Bar -->
+            <div class="confidence-container">
+                <div class="confidence-labels">
+                    <span>Morning (100%)</span>
+                    <span>Night (0%)</span>
+                </div>
+                <div class="confidence-track">
+                    <div id="confidence-fill" class="confidence-fill" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="game-header">
+                <h2 class="target-title">Convince him it's: <span id="target-object-text" class="highlight">...</span></h2>
+                <div class="attempts-left">Attempts left: <span id="attempts-count">5</span></div>
+            </div>
+            
+            <div class="game-content">
+                <div class="canvas-container">
+                    <!-- Using an img inside a frame that looks like a canvas -->
+                    <div class="image-frame">
+                        <div class="canvas-loading" id="canvas-loading">Professor is drawing...</div>
+                        <img id="ms-paint-img" class="ms-paint-img hidden" src="" alt="MS Paint Drawing" referrerpolicy="no-referrer">
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div id="chat-log" class="chat-log">
+                        <!-- Chat messages injected here -->
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Type your argument here..." autocomplete="off">
+                        <button id="send-btn" class="send-btn">SEND</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../site.js"></script>
+    <script src="gaslighter.js"></script>
+</body>
+
+</html>

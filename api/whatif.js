@@ -36,15 +36,15 @@ Each object must have:
 - "keyword": A SINGLE generic noun for a stock photo (e.g. "volcano", "robot", "penguin", "satellite")`;
 
     try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${process.env.WHAT_IF_KEY}`,
+                'Authorization': `Bearer ${process.env.GEMMA_KEY}`,
                 'Content-Type': 'application/json',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             },
             body: JSON.stringify({
-                model: 'openai/gpt-oss-20b',
+                model: 'gemma-4-31b-it',
                 messages: [
                     { role: 'system', content: SYSTEM_PROMPT },
                     { role: 'user', content: `What if ${prompt}` }
@@ -61,6 +61,7 @@ Each object must have:
 
         const data = await response.json();
         let jsonStr = data.choices[0].message.content.trim();
+        jsonStr = jsonStr.replace(/<thought>[\s\S]*?<\/thought>/g, '').trim();
 
         // Strip markdown if necessary
         if (jsonStr.startsWith('```')) {
@@ -85,14 +86,14 @@ Each object must have:
             // Second AI check: ask the model to fix its own broken JSON
             console.warn('First parse failed, attempting AI repair...', firstParseError.message);
 
-            const repairResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            const repairResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${process.env.WHAT_IF_KEY}`,
+                    'Authorization': `Bearer ${process.env.GEMMA_KEY}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: 'openai/gpt-oss-20b',
+                    model: 'gemma-4-31b-it',
                     messages: [
                         {
                             role: 'system',
@@ -110,6 +111,7 @@ Each object must have:
 
             const repairData = await repairResponse.json();
             let repairedStr = repairData.choices[0].message.content.trim();
+            repairedStr = repairedStr.replace(/<thought>[\s\S]*?<\/thought>/g, '').trim();
 
             if (repairedStr.startsWith('```')) {
                 repairedStr = repairedStr.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '');
