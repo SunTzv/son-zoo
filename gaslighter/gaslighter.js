@@ -25,6 +25,7 @@ const playAgainBtn = document.getElementById('play-again-btn');
 const mainMenuBtn = document.getElementById('main-menu-btn');
 const sendBtn = document.getElementById('send-btn');
 const confidenceFill = document.getElementById('confidence-fill');
+const proceedBtn = document.getElementById('proceed-btn');
 
 // State
 // Loading Screen & Mini-game
@@ -62,6 +63,13 @@ if (mainMenuBtn) {
     });
 }
 
+if (proceedBtn) {
+    proceedBtn.addEventListener('click', () => {
+        proceedBtn.classList.add('hidden');
+        gameOverModal.classList.remove('hidden');
+    });
+}
+
 function endGame(win) {
     gameActive = false;
     chatInput.disabled = true;
@@ -75,9 +83,15 @@ function endGame(win) {
         gameOverMessage.textContent = "The professor held his ground. You ran out of attempts.";
     }
 
-    setTimeout(() => {
-        gameOverModal.classList.remove('hidden');
-    }, 1500); // Wait 1.5 seconds so player can read his final message
+    if (proceedBtn) {
+        setTimeout(() => {
+            proceedBtn.classList.remove('hidden');
+        }, 1500); // Wait 1.5 seconds so player can read his final message
+    } else {
+        setTimeout(() => {
+            gameOverModal.classList.remove('hidden');
+        }, 1500);
+    }
 }
 
 // Update Environment based on confidence
@@ -138,6 +152,8 @@ async function startGame() {
     
     startScreen.classList.add('hidden');
     loadingScreen.classList.remove('hidden');
+    
+    if (proceedBtn) proceedBtn.classList.add('hidden');
     
     // Start mini-game
     glassesCaught = 0;

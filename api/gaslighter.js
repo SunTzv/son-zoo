@@ -47,7 +47,7 @@ No markdown formatting, no other text.`;
 
         let response, data, content;
         const maxRetries = 3;
-        
+
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
                 response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
@@ -64,11 +64,11 @@ No markdown formatting, no other text.`;
                         max_tokens: 4096
                     })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
-                
+
                 data = await response.json();
                 content = data.choices[0].message.content.trim();
                 content = content.replace(/<thought>[\s\S]*?<\/thought>/g, '').trim();
@@ -122,7 +122,7 @@ CRITICAL RULES FOR YOUR RESPONSE:
 2. YOU DO NOT KNOW what they are trying to convince you of. Only respond to what they actually say!
 3. DO NOT use the words "drawing", "image", "trick", "gaslight", "game", or "pixels". Treat the "${actual}" as a real physical object in the room.
 4. DO NOT narrate your actions (e.g., no "*sips coffee*").
-5. Just stubbornly defend the physical traits of your "${actual}".
+5. Just defend your "${actual}".
 
 Return ONLY a raw JSON object with exactly two keys:
 - "response": your conversational reply.
@@ -137,7 +137,7 @@ Return ONLY a raw JSON object with exactly two keys:
 
         let response, data;
         const maxRetries = 3;
-        
+
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
                 response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
@@ -157,7 +157,7 @@ Return ONLY a raw JSON object with exactly two keys:
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
-                
+
                 data = await response.json();
                 break; // Success
             } catch (err) {
