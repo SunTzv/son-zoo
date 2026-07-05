@@ -224,6 +224,7 @@ body.gaslighter-page.night-mode {
 .canvas-container {
     padding: 20px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     background: #f9f9f9;
