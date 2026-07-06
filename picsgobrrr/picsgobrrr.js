@@ -1,6 +1,6 @@
 const datePicker = document.getElementById('date-picker');
 const gridBtn = document.getElementById('grid-btn');
-const toggleNumbers = document.getElementById('toggle-numbers');
+const toggleNumbersBtn = document.getElementById('toggle-numbers-btn');
 const shuffleBtn = document.getElementById('shuffle-btn');
 const autoSolveBtn = document.getElementById('auto-solve-btn');
 const playAgainBtn = document.getElementById('play-again-btn');
@@ -17,6 +17,8 @@ let emptyIndex = -1; // Index in the 1D array
 let movesCount = 0;
 let targetMoves = -1;
 let autoSolveUsed = false;
+let autoSolveInterval = null;
+let numbersVisible = true;
 
 // Use URL param for date, otherwise today
 const urlParams = new URLSearchParams(window.location.search);
@@ -42,22 +44,21 @@ function getImageUrlForDate(dateString) {
 }
 
 function initGame() {
-    hideAllOverlays();
-    loadingOverlay.classList.remove('hidden');
-    puzzleBoard.innerHTML = '';
-    puzzleBoard.className = 'puzzle-board show-numbers';
-    if (!toggleNumbers.checked) {
-        puzzleBoard.classList.remove('show-numbers');
-    }
-    
-    grid = parseInt(gridBtn.dataset.grid);
+    const currentGrid = parseInt(gridBtn.dataset.grid);
     const imgUrl = getImageUrlForDate(dateVal);
 
-    // Preload image to check if it exists and to get dimensions (even though we assume 1:1)
     const img = new Image();
+    
     img.onload = () => {
+        hideAllOverlays();
+        puzzleBoard.innerHTML = '';
+        puzzleBoard.className = 'puzzle-board show-numbers';
+        if (!numbersVisible) {
+            puzzleBoard.classList.remove('show-numbers');
+        }
+        
+        grid = currentGrid;
         currentImage = imgUrl;
-        loadingOverlay.classList.add('hidden');
         setupBoard();
         
         autoSolveUsed = false;
@@ -65,29 +66,92 @@ function initGame() {
         targetMoves = -1;
         updateHUD();
         
-        shuffleBoard();
+        // Yield to browser to paint before animation
+        setTimeout(() => {
+            playShuffleAnimation(() => {
+                shuffleBoard();
+                
+                // Yield before solving
+                setTimeout(() => {
+                    let pathResult = solvePuzzle(tiles, grid);
+                    
+                    if (pathResult && pathResult.length > 0) {
+                        targetMoves = pathResult.length;
+                        optimalPath = pathResult;
+                        autoSolveBtn.classList.remove('hidden');
+                    } else {
+                        targetMoves = -1;
+                        optimalPath = null;
+                        autoSolveBtn.classList.add('hidden');
+                    }
+                    updateHUD();
+                }, 100);
+            });
+        }, 50);
+    };
+    
+    img.onerror = () => {
+        hideAllOverlays();
+        errorOverlay.classList.remove('hidden');
+    };
+    
+    img.src = imgUrl;
+    
+    // Only show loading overlay if the image isn't instantly available from cache
+    if (!img.complete) {
+        hideAllOverlays();
+        loadingOverlay.classList.remove('hidden');
+    }
+}
+
+function resetAndShuffle() {
+    if (tiles.length !== grid * grid) {
+        initGame();
+        return;
+    }
+    
+    if (autoSolveInterval) {
+        clearInterval(autoSolveInterval);
+        autoSolveInterval = null;
+        autoSolveBtn.textContent = 'DO THE MATH FOR ME';
+    }
+    
+    hideAllOverlays();
+    autoSolveUsed = false;
+    movesCount = 0;
+    targetMoves = -1;
+    updateHUD();
+    
+    puzzleBoard.classList.remove('seamless', 'glowing');
+    const missing = document.querySelector('.missing-piece-reveal');
+    if (missing) missing.remove();
+    
+    autoSolveBtn.classList.add('hidden');
+    
+    playShuffleAnimation(() => {
+        const fallbackPath = shuffleBoard();
         
-        // Yield to browser to paint the shuffled board before running the heavy IDA* math engine
+        // Show calculating state
+        autoSolveBtn.textContent = 'CALCULATING...';
+        autoSolveBtn.classList.remove('hidden');
+        
         setTimeout(() => {
             let pathResult = solvePuzzle(tiles, grid);
             
-            if (pathResult && pathResult.length > 0) {
+            // Check if IDA* found an optimal path (must be an array)
+            if (Array.isArray(pathResult) && pathResult.length > 0) {
                 targetMoves = pathResult.length;
                 optimalPath = pathResult;
-                autoSolveBtn.classList.remove('hidden');
             } else {
-                targetMoves = -1;
-                optimalPath = null;
-                autoSolveBtn.classList.add('hidden');
+                // If it timed out or was too deep, use the mathematically perfect inverse shuffle path!
+                targetMoves = fallbackPath.length;
+                optimalPath = fallbackPath;
             }
+            
+            autoSolveBtn.textContent = 'DO THE MATH FOR ME';
             updateHUD();
-        }, 50);
-    };
-    img.onerror = () => {
-        loadingOverlay.classList.add('hidden');
-        errorOverlay.classList.remove('hidden');
-    };
-    img.src = imgUrl;
+        }, 100);
+    });
 }
 
 function updateHUD() {
@@ -96,10 +160,10 @@ function updateHUD() {
     
     if (targetMoves > -1) {
         targetEl.innerText = `TARGET: ${targetMoves}`;
-        targetEl.classList.remove('hidden');
     } else {
-        targetEl.classList.add('hidden');
+        targetEl.innerText = `TARGET: 0`;
     }
+    targetEl.classList.remove('hidden');
 }
 
 function setupBoard() {
@@ -136,6 +200,9 @@ function setupBoard() {
             
             tile.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
             
+            // Temporarily disable transition so they don't animate from top-left (0,0)
+            tile.style.transition = 'none';
+            
             // Add click listener
             tile.addEventListener('click', () => handleTileClick(i + 1));
             
@@ -144,6 +211,13 @@ function setupBoard() {
     }
     emptyIndex = numTiles - 1;
     renderBoard();
+    
+    // Force browser reflow to apply the initial positions synchronously
+    void puzzleBoard.offsetHeight;
+    
+    // Restore CSS transitions
+    const allTiles = puzzleBoard.querySelectorAll('.tile');
+    allTiles.forEach(t => t.style.transition = '');
 }
 
 function renderBoard() {
@@ -162,8 +236,9 @@ function renderBoard() {
                 
                 tile.style.width = `${tileSize}%`;
                 tile.style.height = `${tileSize}%`;
-                tile.style.left = `${currentX * tileSize}%`;
-                tile.style.top = `${currentY * tileSize}%`;
+                tile.style.left = `0`;
+                tile.style.top = `0`;
+                tile.style.transform = `translate(${currentX * 100}%, ${currentY * 100}%)`;
             }
         }
     }
@@ -183,10 +258,12 @@ function handleTileClick(tileNumber) {
         emptyIndex = tileIndex;
         
         movesCount++;
+        // Invalidate the optimal/fallback path if the user makes a manual move
+        optimalPath = null;
+        
         updateHUD();
         
-        // Hide auto solve if user makes a move manually
-        autoSolveBtn.classList.add('hidden');
+        // Removed hiding auto solve to allow it from current position
         
         renderBoard();
         checkWin();
@@ -213,6 +290,7 @@ function shuffleBoard() {
     if (grid === 5) moves = 40;
     
     let lastMoved = -1;
+    let fallbackPath = []; // Record the path to guarantee a solve!
     
     for (let i = 0; i < moves; i++) {
         const emptyX = emptyIndex % grid;
@@ -229,6 +307,9 @@ function shuffleBoard() {
         
         const randomIdx = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
         
+        // Record the empty index BEFORE swap. Clicking this index will undo the move!
+        fallbackPath.push(emptyIndex);
+        
         // Swap
         tiles[emptyIndex] = tiles[randomIdx];
         tiles[randomIdx] = 0;
@@ -237,6 +318,90 @@ function shuffleBoard() {
     }
     
     renderBoard();
+    return fallbackPath.reverse(); // The exact sequence of clicks to reverse the entire shuffle
+}
+
+function playShuffleAnimation(callback) {
+    const animationSteps = 5;
+    let currentStep = 0;
+    
+    // Choose a random shuffle animation style
+    const styles = ['scatter', 'implode', 'twirl', 'spiral', 'drop'];
+    const chosenStyle = styles[Math.floor(Math.random() * styles.length)];
+    
+    // Add shuffling-anim class for faster transition
+    for (let i = 1; i < tiles.length; i++) {
+        const tile = document.getElementById(`tile-${i}`);
+        if (tile) tile.classList.add('shuffling-anim');
+    }
+    
+    const interval = setInterval(() => {
+        if (currentStep >= animationSteps) {
+            clearInterval(interval);
+            for (let i = 1; i < tiles.length; i++) {
+                const tile = document.getElementById(`tile-${i}`);
+                if (tile) {
+                    tile.classList.remove('shuffling-anim');
+                }
+            }
+            // Add a tiny delay to let the remove class apply before callback
+            setTimeout(callback, 50);
+            return;
+        }
+        
+        // Randomly scatter tiles based on chosen style
+        for (let i = 1; i < tiles.length; i++) {
+            const tile = document.getElementById(`tile-${i}`);
+            if (tile) {
+                const maxTrans = (grid - 1) * 100;
+                let tx = 0, ty = 0, rot = 0, scale = 1;
+                
+                switch (chosenStyle) {
+                    case 'scatter':
+                        tx = (Math.random() - 0.5) * maxTrans;
+                        ty = (Math.random() - 0.5) * maxTrans;
+                        rot = (Math.random() - 0.5) * 60;
+                        scale = 0.9;
+                        break;
+                    case 'implode':
+                        tx = 0; ty = 0; rot = 180; scale = 0.3;
+                        break;
+                    case 'twirl':
+                        tx = (Math.random() - 0.5) * maxTrans;
+                        ty = (Math.random() - 0.5) * maxTrans;
+                        rot = 720; scale = 0.5;
+                        break;
+                    case 'spiral':
+                        const angle = i * (Math.PI * 2) / (tiles.length - 1) + currentStep;
+                        tx = Math.cos(angle) * (maxTrans / 2);
+                        ty = Math.sin(angle) * (maxTrans / 2);
+                        rot = 360;
+                        break;
+                    case 'drop':
+                        tx = 0;
+                        ty = 100 + (Math.random() * 200);
+                        rot = (Math.random() - 0.5) * 90;
+                        break;
+                }
+                
+                // Get current position in grid to base the translation off of it
+                const currentIdx = tiles.indexOf(i);
+                let currentX = 0, currentY = 0;
+                if (currentIdx !== -1) {
+                    currentX = currentIdx % grid;
+                    currentY = Math.floor(currentIdx / grid);
+                }
+                
+                // Add the tile's current actual position to the shuffle offset
+                const finalTx = (currentX * 100) + tx;
+                const finalTy = (currentY * 100) + ty;
+                
+                tile.style.transform = `translate(${finalTx}%, ${finalTy}%) rotate(${rot}deg) scale(${scale})`;
+            }
+        }
+        
+        currentStep++;
+    }, 150); // Quick jumps
 }
 
 function checkWin() {
@@ -252,18 +417,14 @@ function checkWin() {
         const winMsg = document.getElementById('win-message');
         if (autoSolveUsed) {
             winMsg.innerHTML = `AUTO-SOLVED!<br>(No credit for you!)`;
-            winMsg.style.color = 'var(--goofy-pink)';
         } else if (targetMoves > -1) {
             if (movesCount <= targetMoves) {
                 winMsg.innerHTML = `FLAWLESS VICTORY!<br>You matched the mathematically perfect path (${movesCount} moves)!`;
-                winMsg.style.color = 'var(--goofy-cyan)';
             } else {
                 winMsg.innerHTML = `Solved in ${movesCount} moves.<br>(Optimal was ${targetMoves}. Can you do better?)`;
-                winMsg.style.color = 'var(--ink-black)';
             }
         } else {
             winMsg.innerHTML = `Solved in ${movesCount} moves!`;
-            winMsg.style.color = 'var(--ink-black)';
         }
 
         // WIN SEQUENCE
@@ -282,8 +443,9 @@ function checkWin() {
             
             missingTile.style.width = `${tileSize}%`;
             missingTile.style.height = `${tileSize}%`;
-            missingTile.style.left = `${targetX * tileSize}%`;
-            missingTile.style.top = `${targetY * tileSize}%`;
+            missingTile.style.left = `0`;
+            missingTile.style.top = `0`;
+            missingTile.style.transform = `translate(${targetX * 100}%, ${targetY * 100}%)`;
             
             const xPercent = grid > 1 ? (targetX / (grid - 1)) * 100 : 0;
             const yPercent = grid > 1 ? (targetY / (grid - 1)) * 100 : 0;
@@ -291,46 +453,73 @@ function checkWin() {
             
             puzzleBoard.appendChild(missingTile);
             
-            // 3. Make seamless and spawn butterflies
+            // 3. Make seamless and wait
             setTimeout(() => {
                 puzzleBoard.classList.add('seamless');
-                spawnButterflies();
-                winOverlay.classList.remove('hidden');
-            }, 1000);
+                
+                // Wait 1.2 seconds showing full image
+                setTimeout(() => {
+                    // Randomly choose victory animation
+                    const victoryType = Math.random() > 0.5 ? 'flip' : 'shatter';
+                    
+                    if (victoryType === 'flip') {
+                        puzzleBoard.classList.add('victory-flip');
+                        setTimeout(() => {
+                            puzzleBoard.classList.remove('victory-flip');
+                            winOverlay.classList.remove('hidden');
+                            winOverlay.classList.add('win-crazy-pop');
+                        }, 1800); // Wait for flip animation
+                    } else {
+                        spawnShatterParticles();
+                        setTimeout(() => {
+                            winOverlay.classList.remove('hidden');
+                            winOverlay.classList.add('win-crazy-pop');
+                        }, 1500); // Wait for shatter drop
+                    }
+                    
+                }, 1200); // 1.2s full image pause
+                
+            }, 1000); // Wait for piece to fade in
             
         }, 200);
     }
 }
 
-function spawnButterflies() {
+function spawnShatterParticles() {
     const rect = puzzleBoard.getBoundingClientRect();
+    const rows = grid;
+    const cols = grid;
+    const width = rect.width / cols;
+    const height = rect.height / rows;
     
-    for (let i = 0; i < 30; i++) {
-        const b = document.createElement('div');
-        b.className = 'butterfly';
-        b.style.backgroundImage = `url(${currentImage})`;
-        
-        // Random starting position near center of board
-        const startX = rect.left + rect.width / 2 + (Math.random() - 0.5) * 100;
-        const startY = rect.top + rect.height / 2 + (Math.random() - 0.5) * 100;
-        b.style.left = startX + 'px';
-        b.style.top = startY + 'px';
-        
-        // Random background section for butterfly
-        b.style.backgroundPosition = `${Math.random() * 100}% ${Math.random() * 100}%`;
-        
-        // Random trajectory
-        const tx = (Math.random() - 0.5) * 1000 + 'px';
-        const ty = (Math.random() - 0.5) * 1000 - 500 + 'px'; // tend to fly up
-        const rot = (Math.random() - 0.5) * 720 + 'deg';
-        
-        b.style.setProperty('--tx', tx);
-        b.style.setProperty('--ty', ty);
-        b.style.setProperty('--rot', rot);
-        
-        document.body.appendChild(b);
-        
-        setTimeout(() => b.remove(), 2500);
+    // Create a flash effect on the board
+    puzzleBoard.style.filter = 'brightness(2)';
+    setTimeout(() => puzzleBoard.style.filter = '', 200);
+    
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const p = document.createElement('div');
+            p.className = 'shatter-piece';
+            p.style.backgroundImage = `url(${currentImage})`;
+            
+            p.style.width = width + 'px';
+            p.style.height = height + 'px';
+            p.style.left = (rect.left + c * width) + 'px';
+            p.style.top = (rect.top + r * height) + 'px';
+            
+            p.style.backgroundSize = `${rect.width}px ${rect.height}px`;
+            p.style.backgroundPosition = `-${c * width}px -${r * height}px`;
+            
+            const angle = (Math.random() - 0.5) * Math.PI;
+            const velocityX = Math.cos(angle) * (Math.random() * 400 - 200);
+            
+            p.style.setProperty('--tx', velocityX + 'px');
+            p.style.setProperty('--rot', (Math.random() - 0.5) * 720 + 'deg');
+            p.style.animationDelay = (Math.random() * 0.3) + 's';
+            
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 2000);
+        }
     }
 }
 
@@ -338,42 +527,65 @@ function hideAllOverlays() {
     loadingOverlay.classList.add('hidden');
     errorOverlay.classList.add('hidden');
     winOverlay.classList.add('hidden');
+    winOverlay.classList.remove('win-crazy-pop');
 }
 
 // Event Listeners
-shuffleBtn.addEventListener('click', initGame);
-playAgainBtn.addEventListener('click', initGame);
+shuffleBtn.addEventListener('click', resetAndShuffle);
+playAgainBtn.addEventListener('click', resetAndShuffle);
 
 autoSolveBtn.addEventListener('click', () => {
-    if (!optimalPath || optimalPath.length === 0) return;
+    if (autoSolveUsed) return;
     
     autoSolveUsed = true;
     
-    // Hide buttons during animation
-    autoSolveBtn.classList.add('hidden');
+    // Show 'SOLVING...' text and hide shuffle
+    autoSolveBtn.textContent = 'SOLVING...';
     shuffleBtn.classList.add('hidden');
     
-    let step = 0;
-    const interval = setInterval(() => {
-        if (step >= optimalPath.length) {
-            clearInterval(interval);
-            shuffleBtn.classList.remove('hidden');
-            return;
+    // Yield to the browser so the button text updates before freezing during calculation
+    setTimeout(() => {
+        // Calculate the path from the *current* state of the tiles
+        let pathResult = solvePuzzle(tiles, grid);
+        
+        // If IDA* timed out (returns "TIMEOUT") or failed, use the fallback if available
+        if (!Array.isArray(pathResult) || pathResult.length === 0) {
+            if (optimalPath && optimalPath.length > 0) {
+                pathResult = optimalPath;
+            } else {
+                // If they made manual moves and we can't solve it, we must give up
+                autoSolveBtn.classList.add('hidden');
+                shuffleBtn.classList.remove('hidden');
+                autoSolveBtn.textContent = 'DO THE MATH FOR ME';
+                autoSolveUsed = false;
+                return;
+            }
         }
         
-        // optimalPath[step] contains the index where the empty space needs to move.
-        // We find the tile currently at that index and 'click' it.
-        const targetIdx = optimalPath[step];
-        const tileNumber = tiles[targetIdx];
-        
-        if (tileNumber) {
-            handleTileClick(tileNumber);
-            // Re-show auto solve if handleTileClick hid it, since we're in auto mode
-            // Actually, handleTileClick hides it, which is fine, we don't need it visible while solving.
-        }
-        
-        step++;
-    }, 250); // 250ms per move
+        autoSolveBtn.classList.add('hidden');
+            
+            let step = 0;
+            if (autoSolveInterval) clearInterval(autoSolveInterval);
+            
+            autoSolveInterval = setInterval(() => {
+                if (step >= pathResult.length) {
+                    clearInterval(autoSolveInterval);
+                    autoSolveInterval = null;
+                    shuffleBtn.classList.remove('hidden');
+                    autoSolveBtn.textContent = 'DO THE MATH FOR ME';
+                    return;
+                }
+                
+                const targetIdx = pathResult[step];
+                const tileNumber = tiles[targetIdx];
+                
+                if (tileNumber) {
+                    handleTileClick(tileNumber);
+                }
+                
+                step++;
+            }, 250); // 250ms per move
+    }, 50);
 });
 
 gridBtn.addEventListener('click', () => {
@@ -385,11 +597,14 @@ gridBtn.addEventListener('click', () => {
     initGame();
 });
 
-toggleNumbers.addEventListener('change', (e) => {
-    if (e.target.checked) {
+toggleNumbersBtn.addEventListener('click', () => {
+    numbersVisible = !numbersVisible;
+    if (numbersVisible) {
         puzzleBoard.classList.add('show-numbers');
+        toggleNumbersBtn.textContent = 'NUMBERS: ON';
     } else {
         puzzleBoard.classList.remove('show-numbers');
+        toggleNumbersBtn.textContent = 'NUMBERS: OFF';
     }
 });
 

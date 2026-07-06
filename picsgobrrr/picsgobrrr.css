@@ -1,144 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap');
+
+:root {
+    --bg-color: #fff8e1; /* Warm frothy cream */
+    --text-main: #3e2723; /* Deep roasted coffee bean */
+    --text-muted: #6d4c41; /* Cocoa */
+    --accent-warm: #d84315; /* Fiery caramel/orange */
+    --accent-pop: #ff6f00; /* Vibrant amber */
+    
+    /* Vibrant, poppy Claymorphism shadows */
+    --clay-shadow-out: 12px 12px 24px #e8d5b5, -12px -12px 24px #ffffff;
+    --clay-shadow-in: inset 6px 6px 12px rgba(62,39,35,0.05), inset -6px -6px 12px rgba(255,255,255,0.9);
+    --clay-shadow-btn: 6px 6px 12px #e8d5b5, -6px -6px 12px #ffffff;
+    --clay-shadow-btn-active: inset 4px 4px 8px #d5bda0, inset -4px -4px 8px #ffffff;
+}
+
+/* Custom Sleek Scrollbar to override the global magnet one */
+::-webkit-scrollbar {
+    width: 8px !important;
+}
+::-webkit-scrollbar-track {
+    background: #ffe0b2 !important;
+    border: none !important;
+}
+::-webkit-scrollbar-thumb {
+    background: #d4a373 !important;
+    border-radius: 4px !important;
+    background-image: none !important;
+    border: none !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #8d6e63 !important;
+    background-image: none !important;
+}
+
 .pics-page {
     width: 100vw;
     min-height: 100vh;
     margin: 0;
-    padding: 1rem;
+    padding: 2rem;
+    display: flex;
+    flex-direction: row; /* Side by side layout for title and game */
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    /* Lively Coffee Gradient Background */
+    background: radial-gradient(circle at center, #fff3e0 0%, #ffe0b2 100%);
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-main);
+    overflow: hidden; /* Prevent scrolling if centered perfectly */
+}
+
+@media (max-width: 1000px) {
+    .pics-page {
+        flex-direction: column;
+        overflow: auto; /* Allow scroll on small screens */
+    }
+}
+
+.right-panel {
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-sizing: border-box;
-    background-color: #ffe5e5;
+    gap: 1.5rem;
 }
-
-
 
 .game-header {
     text-align: center;
-    margin-bottom: 1rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .game-header h1 {
-    font-size: 3rem;
+    font-size: 4rem;
     margin: 0;
     text-transform: uppercase;
-    background-color: var(--goofy-yellow);
-    padding: 0.5rem 1rem;
-    border: 4px solid var(--ink-black);
-    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-    box-shadow: 6px 6px 0 var(--ink-black);
-    display: inline-block;
-    transform: rotate(-1deg);
+    letter-spacing: 4px;
+    color: var(--text-main);
+    font-weight: 900;
+    text-shadow: 4px 4px 0px #ffcc80, 8px 8px 15px rgba(62,39,35,0.15);
+    
+    /* Override global goofy styles from style.css */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    display: block !important;
+}
+
+.game-header .subtitle {
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    margin-top: 1rem;
+    font-weight: 600;
+    letter-spacing: 2px;
 }
 
 .game-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 2rem;
-    width: 100%;
-    max-width: 800px;
+    justify-content: center;
+    gap: 3rem;
+    max-width: 1000px;
+}
+
+@media (max-width: 800px) {
+    .game-container {
+        flex-direction: column;
+    }
 }
 
 .controls-panel {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 1.5rem;
     justify-content: center;
-    align-items: center;
-    background: rgba(255, 253, 246, 0.85); /* Slightly transparent for elegance */
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 1rem 2rem;
-    border: 4px solid var(--ink-black);
-    border-radius: 15px 255px 15px 225px/225px 15px 255px 15px;
-    box-shadow: 6px 6px 0 var(--ink-black);
+    align-items: stretch;
+    background: var(--bg-color);
+    padding: 2.5rem 2rem;
+    border-radius: 30px;
+    box-shadow: var(--clay-shadow-out);
+    min-width: 250px;
 }
 
 .control-group {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    font-family: var(--font-heavy);
-    font-size: 1.1rem;
-}
-
-.checkbox-group {
-    flex-direction: row;
-    align-items: center;
     gap: 0.5rem;
 }
 
-.goofy-input {
-    font-family: var(--font-main);
-    font-size: 1rem;
-    padding: 0.25rem 0.5rem;
-    border: 3px solid var(--ink-black);
-    border-radius: 8px;
-    background: #fff;
-}
-
 .goofy-btn {
-    font-family: var(--font-heavy);
-    font-size: 1.2rem;
-    padding: 0.5rem 1rem;
-    background-color: var(--goofy-cyan);
-    color: var(--ink-black);
-    border: 4px solid var(--ink-black);
-    border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-    box-shadow: 5px 5px 0 var(--ink-black);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 1rem 1.5rem;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    border: none;
+    border-radius: 20px;
     cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.1s;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: var(--clay-shadow-btn);
+    text-align: center;
+    text-decoration: none;
 }
 
 .goofy-btn:hover {
+    color: var(--accent-warm);
     transform: translateY(-2px);
-    box-shadow: 7px 7px 0 var(--ink-black);
+    box-shadow: 8px 8px 16px #e8d5b5, -8px -8px 16px #ffffff;
 }
 
 .goofy-btn:active {
-    transform: translateY(2px);
-    box-shadow: 2px 2px 0 var(--ink-black);
+    transform: translateY(0);
+    box-shadow: var(--clay-shadow-btn-active);
+    color: var(--text-main);
+}
+
+#auto-solve-btn {
+    color: var(--accent-pop);
+}
+#auto-solve-btn:hover {
+    color: #e65100;
 }
 
 .board-wrapper {
     position: relative;
     width: 90vw;
-    max-width: 500px;
+    max-width: 550px;
     aspect-ratio: 1 / 1;
-    border: 6px solid var(--ink-black);
-    border-radius: 15px 255px 15px 225px/225px 15px 255px 15px;
-    background-color: var(--paper-white);
-    box-shadow: 10px 10px 0 var(--ink-black);
+    border-radius: 30px;
+    background-color: var(--bg-color);
+    box-shadow: var(--clay-shadow-out), var(--clay-shadow-in);
     overflow: hidden;
+    padding: 12px;
 }
 
 .hud-panel {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+    top: 20px;
+    left: 20px;
+    width: calc(100% - 40px);
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem 1rem;
-    box-sizing: border-box;
-    z-index: 5;
     pointer-events: none;
+    z-index: 5;
 }
 
 #moves-counter, #target-counter {
-    background: rgba(255, 255, 255, 0.9);
-    border: 3px solid var(--ink-black);
-    padding: 0.25rem 0.5rem;
-    border-radius: 8px;
-    font-family: var(--font-heavy);
-    font-size: 1.2rem;
-    font-weight: 900;
-    color: var(--ink-black);
-    box-shadow: 3px 3px 0 var(--ink-black);
+    background: rgba(255, 248, 225, 0.9);
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    box-shadow: var(--clay-shadow-btn);
+    letter-spacing: 1px;
 }
 
 #target-counter {
-    color: var(--goofy-pink);
+    color: var(--accent-pop);
 }
 
 #target-counter.hidden {
@@ -149,62 +217,59 @@
     position: relative;
     width: 100%;
     height: 100%;
-    /* Pattern for empty slot background */
-    background: repeating-linear-gradient(
-        45deg,
-        #f0f0f0,
-        #f0f0f0 10px,
-        #e0e0e0 10px,
-        #e0e0e0 20px
-    );
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(62,39,35,0.03);
+    box-shadow: inset 3px 3px 15px rgba(62,39,35,0.06);
 }
 
 .tile {
     position: absolute;
     box-sizing: border-box;
-    border: 2px solid var(--ink-black);
+    border: 3px solid var(--bg-color); /* Thicker gap for clay look */
+    border-radius: 15px;
     cursor: pointer;
     
-    /* Improved movement mechanics with a slightly springy ease */
-    transition: top 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     
-    /* Prevent holding and dragging the background image ghost */
     user-select: none;
     -webkit-user-select: none;
     -webkit-user-drag: none;
     
-    /* Center numbers */
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    /* Ensure image fits perfectly inside tile */
     background-size: var(--board-size) var(--board-size); 
     background-repeat: no-repeat;
+    
+    box-shadow: 2px 2px 8px rgba(62,39,35,0.15);
 }
 
 .tile::after {
-    /* Number text */
     content: attr(data-number);
-    font-family: var(--font-heavy);
     font-size: 2rem;
-    color: var(--ink-black);
-    background: rgba(255, 255, 255, 0.7);
-    padding: 0 0.4rem;
-    border-radius: 8px;
-    border: 2px solid var(--ink-black);
+    font-weight: 900;
+    color: var(--text-main);
+    background: rgba(255, 248, 225, 0.9);
+    padding: 0.2rem 0.8rem;
+    border-radius: 12px;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s ease;
+    box-shadow: 3px 3px 8px rgba(62,39,35,0.15);
 }
 
-/* Toggle numbers visibility via parent class */
 .puzzle-board.show-numbers .tile::after {
     opacity: 1;
 }
 
-/* Hover effects for clickable tiles */
 .tile:hover {
     filter: brightness(1.1);
+    z-index: 2;
+}
+
+.tile.shuffling-anim {
+    transition: transform 0.4s ease-in-out, opacity 0.3s ease;
+    opacity: 0.8;
 }
 
 /* Overlays */
@@ -214,115 +279,77 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.9);
+    box-sizing: border-box; /* PREVENT PADDING FROM EXPANDING WIDTH */
+    background: rgba(255, 248, 225, 0.85);
+    backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 10;
     text-align: center;
-    padding: 1rem;
-    font-family: var(--font-heavy);
-    font-size: 1.5rem;
+    padding: 2rem;
+    border-radius: 20px;
 }
 
 .overlay.hidden {
     display: none;
 }
 
+#win-overlay {
+    background: rgba(40, 25, 20, 0.85); /* Deep elegant dark brown */
+    backdrop-filter: blur(8px);
+    padding-bottom: 4rem; /* Optically shifts content up to fix bottom-heavy look */
+}
+
+#win-overlay.win-crazy-pop {
+    animation: fadeInWin 0.4s ease-out forwards;
+}
+
+@keyframes fadeInWin {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 #win-overlay h2 {
     font-size: 3rem;
-    color: var(--goofy-pink);
-    margin: 0 0 1rem 0;
-    text-shadow: 3px 3px 0 var(--ink-black);
-    transform: rotate(-3deg);
+    color: #fff8e1;
+    margin: 0 -4px 1rem 0; /* -4px margin-right to perfectly balance the 4px letter-spacing */
+    text-transform: uppercase;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.5); /* Clean, professional shadow */
+    animation: heartbeat 2s infinite alternate;
 }
 
-/* Custom Checkbox */
-.custom-checkbox-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-family: var(--font-heavy);
-    font-size: 1.2rem;
-    user-select: none;
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
 }
 
-.custom-checkbox-wrapper input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
+#win-message {
+    font-size: 1.4rem;
+    color: var(--accent-pop);
+    margin-bottom: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
-.custom-checkmark {
-    height: 25px;
-    width: 25px;
-    background-color: #fff;
-    border: 3px solid var(--ink-black);
-    border-radius: 6px;
-    position: relative;
-    box-shadow: 2px 2px 0 var(--ink-black);
-    transition: transform 0.1s, box-shadow 0.1s;
-}
-
-.custom-checkbox-wrapper:hover .custom-checkmark {
-    transform: translateY(-1px);
-    box-shadow: 3px 3px 0 var(--ink-black);
-}
-
-.custom-checkbox-wrapper input:checked ~ .custom-checkmark {
-    background-color: var(--goofy-yellow);
-}
-
-#grid-btn:hover::after, #auto-solve-btn:hover::after {
-    content: " (CLICK ME!)";
-    font-size: 0.8rem;
-    position: absolute;
-    top: -15px;
-    right: -10px;
-    background: var(--goofy-yellow);
-    border: 2px solid var(--ink-black);
-    padding: 2px 5px;
-    transform: rotate(10deg);
-}
-
-#auto-solve-btn:hover::after {
-    content: " (I'M WEAK!)";
-    color: var(--ink-black);
-}
-
-.custom-checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 7px;
-    top: 3px;
-    width: 5px;
-    height: 10px;
-    border: solid var(--ink-black);
-    border-width: 0 3px 3px 0;
-    transform: rotate(45deg);
-}
-
-.custom-checkbox-wrapper input:checked ~ .custom-checkmark:after {
-    display: block;
-}
 
 /* Win State Classes */
 .puzzle-board.seamless .tile {
     border: none !important;
+    border-radius: 0 !important;
     box-shadow: none !important;
     margin: 0 !important;
 }
+
 .puzzle-board.seamless .tile::after {
     display: none !important;
 }
 
 .puzzle-board.glowing {
-    box-shadow: 0 0 40px var(--goofy-cyan), 10px 10px 0 var(--ink-black);
+    box-shadow: 0 0 50px rgba(216, 67, 21, 0.4);
     transition: box-shadow 0.5s ease;
 }
 
@@ -335,26 +362,32 @@
     to { opacity: 1; }
 }
 
-/* Butterfly Particles */
-.butterfly {
-    position: fixed;
-    width: 50px;
-    height: 50px;
-    background-size: cover;
-    z-index: 9999;
-    pointer-events: none;
-    border-radius: 8px;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.4);
-    animation: flyAway 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+/* Fruit Ninja Fireworks */
+/* Victory 1: 3D Flip */
+.victory-flip {
+    animation: flipBoard 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    transform-style: preserve-3d;
+    box-shadow: 0 0 40px var(--accent-pop) !important;
 }
 
-@keyframes flyAway {
-    0% {
-        transform: translate(0, 0) rotate(0deg) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0);
-        opacity: 0;
-    }
+@keyframes flipBoard {
+    0% { transform: perspective(1000px) rotateY(0deg) scale(1); filter: brightness(1); }
+    50% { transform: perspective(1000px) rotateY(180deg) scale(1.15); filter: brightness(1.2); }
+    100% { transform: perspective(1000px) rotateY(360deg) scale(1); filter: brightness(1); }
+}
+
+/* Victory 2: Glass Shatter */
+.shatter-piece {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.3);
+    background-repeat: no-repeat;
+    animation: shatterDrop 1.5s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+    filter: brightness(1.2) contrast(1.1); /* glass look */
+}
+
+@keyframes shatterDrop {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--tx), 800px) rotate(var(--rot)); opacity: 0; }
 }

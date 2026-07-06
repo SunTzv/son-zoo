@@ -12,30 +12,7 @@
 <body class="pics-page">
     <a href="../index.html" class="back-button">← BACK</a>
 
-    <header class="game-header">
-        <h1>PICS GO BRRR</h1>
-        <p class="subtitle">A daily sliding puzzle. Can you fix the picture?</p>
-    </header>
-
     <main class="game-container">
-        <div class="controls-panel">
-            <a href="archive.html" class="goofy-btn" style="text-decoration: none;">ARCHIVE</a>
-
-            <div class="control-group">
-                <button id="grid-btn" class="goofy-btn" data-grid="4">GRID: 4x4</button>
-            </div>
-
-            <button id="shuffle-btn" class="goofy-btn">SHUFFLE & START</button>
-            
-            <label class="custom-checkbox-wrapper">
-                <input type="checkbox" id="toggle-numbers" checked>
-                <span class="custom-checkmark"></span>
-                <span class="checkbox-label">NUMBERS</span>
-            </label>
-
-            <button id="auto-solve-btn" class="goofy-btn hidden" style="background-color: var(--goofy-pink); color: #fff;">DO THE MATH FOR ME</button>
-        </div>
-
         <div class="board-wrapper">
             <div id="loading-overlay" class="overlay hidden">
                 <p>Loading Image...</p>
@@ -51,11 +28,32 @@
 
             <div class="hud-panel">
                 <div id="moves-counter">MOVES: 0</div>
-                <div id="target-counter" class="hidden">TARGET: --</div>
+                <div id="target-counter">TARGET: 0</div>
             </div>
 
             <div id="puzzle-board" class="puzzle-board show-numbers">
                 <!-- Tiles will be injected here by JS -->
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <header class="game-header">
+                <h1>PICS GO BRR</h1>
+                <p class="subtitle">A daily sliding puzzle.</p>
+            </header>
+
+            <div class="controls-panel">
+                <a href="archive.html" class="goofy-btn">ARCHIVE</a>
+
+                <div class="control-group">
+                    <button id="grid-btn" class="goofy-btn" data-grid="4">GRID: 4x4</button>
+                </div>
+
+                <button id="shuffle-btn" class="goofy-btn">SHUFFLE & START</button>
+                
+                <button id="toggle-numbers-btn" class="goofy-btn">NUMBERS: ON</button>
+
+                <button id="auto-solve-btn" class="goofy-btn hidden">DO THE MATH FOR ME</button>
             </div>
         </div>
     </main>
