@@ -1,0 +1,225 @@
+.chesstwo-page {
+    background-color: #302e2b; /* chess.com dark background */
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    text-align: center;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.game-wrapper {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #262522;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.game-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.difficulty-selector {
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.difficulty-selector select {
+    font-size: 1rem;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: none;
+    background: #3c3a37;
+    color: #fff;
+}
+
+#start-btn {
+    background: #81b64c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#start-btn:hover {
+    background: #a3d160;
+}
+
+/* Player Cards */
+.player-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: transparent;
+    text-align: left;
+}
+
+.player-card .avatar {
+    width: 40px;
+    height: 40px;
+    background: #444;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.player-card .avatar img {
+    width: 80%;
+    height: 80%;
+}
+
+.player-card .info {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-card .name {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.player-card .elo {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+/* Chessboard */
+.board-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    border-radius: 4px;
+    overflow: hidden;
+    user-select: none;
+}
+
+.chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.square {
+    width: 100%;
+    height: 100%;
+}
+
+.square.light { background-color: #ebecd0; }
+.square.dark { background-color: #739552; }
+
+/* Layers */
+#highlights-layer, #pieces-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Let clicks pass through to squares/pieces */
+}
+
+#highlights-layer { z-index: 2; }
+#pieces-layer { z-index: 3; pointer-events: none; }
+
+/* Pieces */
+.piece {
+    position: absolute;
+    width: 12.5%;
+    height: 12.5%;
+    cursor: grab;
+    z-index: 5;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: left 0.15s ease-in-out, top 0.15s ease-in-out;
+    pointer-events: auto;
+}
+
+.piece:active { cursor: grabbing; }
+
+.piece.dragging {
+    transition: none; /* Instant follow cursor */
+    z-index: 100;
+}
+
+.square.drop-hint {
+    box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.4);
+}
+
+.piece.ghost {
+    opacity: 0.3;
+    z-index: 4;
+}
+
+/* Highlights */
+.highlight-last-move {
+    position: absolute;
+    width: 12.5%;
+    height: 12.5%;
+    background-color: rgba(255, 255, 51, 0.5);
+}
+
+.highlight-selected {
+    position: absolute;
+    width: 12.5%;
+    height: 12.5%;
+    background-color: rgba(20, 85, 30, 0.5);
+}
+
+/* Move Hints */
+.move-hint {
+    position: absolute;
+    width: 12.5%;
+    height: 12.5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.move-hint.empty::after {
+    content: '';
+    width: 25%;
+    height: 25%;
+    background: rgba(0,0,0,0.2);
+    border-radius: 50%;
+}
+
+.move-hint.capture::after {
+    content: '';
+    width: 80%;
+    height: 80%;
+    border: 6px solid rgba(0,0,0,0.2);
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+#status-message {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ccc;
+}

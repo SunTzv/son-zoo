@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Two</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="chesstwo.css">
+</head>
+<body class="chesstwo-page">
+    <a href="../index.html" class="back-button">← BACK</a>
+
+    <div class="game-wrapper">
+        <header class="game-header">
+            <h1>CHESS TWO</h1>
+            <div class="difficulty-selector">
+                <label>Bot Skill:</label>
+                <select id="difficulty">
+                    <option value="800">800 (Beginner)</option>
+                    <option value="1400" selected>1400 (Intermediate)</option>
+                    <option value="2000">2000 (Expert)</option>
+                </select>
+                <button id="start-btn" class="goofy-btn">START GAME</button>
+            </div>
+        </header>
+
+        <div class="player-card bot-card">
+            <div class="avatar"><img src="../assets/chess_pieces/knight-b.svg" alt="Bot Avatar"></div>
+            <div class="info">
+                <div class="name">Stockfish</div>
+                <div class="elo" id="bot-elo">1400</div>
+            </div>
+        </div>
+
+        <div class="board-container">
+            <div id="chessboard" class="chessboard">
+                <!-- Squares injected by JS -->
+            </div>
+            <div id="pieces-layer">
+                <!-- Pieces injected by JS absolutely -->
+            </div>
+            <div id="highlights-layer">
+                <!-- Last move highlights and valid move dots -->
+            </div>
+        </div>
+
+        <div class="player-card user-card">
+            <div class="avatar"><img src="../assets/chess_pieces/king-w.svg" alt="Player Avatar"></div>
+            <div class="info">
+                <div class="name">Player</div>
+                <div class="elo">472</div>
+            </div>
+        </div>
+        
+        <div id="status-message">Press Start to play.</div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="snd-move" src="../assets/sounds/move-self.mp3"></audio>
+    <audio id="snd-capture" src="../assets/sounds/capture.mp3"></audio>
+    <audio id="snd-check" src="../assets/sounds/move-check.mp3"></audio>
+    <audio id="snd-promote" src="../assets/sounds/promote.mp3"></audio>
+    <audio id="snd-start" src="../assets/sounds/game-start.mp3"></audio>
+    <audio id="snd-end" src="../assets/sounds/game-end.mp3"></audio>
+    <audio id="snd-illegal" src="../assets/sounds/illegal.mp3"></audio>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="chesstwo.js"></script>
+</body>
+</html>
