@@ -9,3 +9,5 @@ test_parse.js
 test.js
 RnD/
 inject_weights.py
+implementation_plan.md
+TESTING/
