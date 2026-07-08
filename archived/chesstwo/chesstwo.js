@@ -114,7 +114,7 @@ function initBoardDOM(fen) {
                 const pElem = document.createElement("div");
                 pElem.className = "piece";
                 const typeName = typeNameMap[piece.type];
-                pElem.style.backgroundImage = `url('../assets/chess_pieces/${typeName}-${piece.color}.svg')`;
+                pElem.style.backgroundImage = `url('../../assets/chess_pieces/${typeName}-${piece.color}.svg')`;
                 setPiecePosition(pElem, squareId);
                 piecesLayer.appendChild(pElem);
                 pieceElements[squareId] = pElem;
@@ -316,7 +316,7 @@ function executeMoveVisually(move) {
 
     if (move.promotion) {
         const typeName = typeNameMap[move.promotion];
-        pElem.style.backgroundImage = `url('../assets/chess_pieces/${typeName}-${move.color}.svg')`;
+        pElem.style.backgroundImage = `url('../../assets/chess_pieces/${typeName}-${move.color}.svg')`;
     }
 
     playSound(move);

@@ -181,18 +181,20 @@ h1 {
     0% {
         transform: scale(1.03) rotate(-2deg);
     }
-
+    50% {
+        transform: scale(0.98) rotate(7deg);
+    }
     100% {
-        transform: scale(1.03) rotate(3deg);
+        transform: scale(1.07) rotate(3deg);
     }
 }
 
 footer {
     text-align: center;
-    margin-top: 6rem;
-    font-weight: bold;
-    font-size: 1.3rem;
-    transform: rotate(0.5deg);
+    margin-top: 8rem;
+    font-weight: 800;
+    font-size: 0.9rem;
+    transform: rotate(-2.5deg);
 }
 
 .card-image {
