@@ -5,32 +5,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Son.zoo</title>
+
+    <!-- Noir Fonts: Anton for headers, Special Elite for typewriter body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Special+Elite&display=swap" rel="stylesheet">
+
+    <!-- Base Styles and Specific App Styles -->
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="whatif.css">
 </head>
 
 <body class="whatif-page">
-        <a href="../index.html" class="back-button">← BACK</a>
 
-        <div class="whatif-stage">
-            <!-- Setup Screen -->
-            <div id="setup-screen" class="setup-panel">
-                <h1>WHAT IF??</h1>
-                <p class="subtitle">Alter the course of history and see what happens...</p>
-                <textarea id="prompt-input" class="prompt-input" placeholder="e.g. the Irish famine never happened..."
-                    rows="3"></textarea>
-                <button id="simulate-btn" class="simulate-btn">SIMULATE TIMELINE</button>
+    <!-- Halftone background pattern -->
+    <div class="noir-bg-pattern"></div>
+
+    <a href="../index.html" class="back-button noir-back">← CLOSE FILE</a>
+
+    <div class="whatif-stage">
+        <!-- Setup Screen (The Ransom Note) -->
+        <div id="setup-screen" class="setup-panel noir-panel">
+            <h1 class="noir-title">WHAT IF?</h1>
+            <p class="subtitle noir-subtitle">ENTER THE SCENARIO:</p>
+            <div class="input-wrapper">
+                <textarea id="prompt-input" class="prompt-input noir-input"
+                    placeholder="e.g. the Irish famine never happened..." rows="3"></textarea>
             </div>
+            <button id="simulate-btn" class="simulate-btn noir-btn">INVESTIGATE</button>
+        </div>
 
-            <!-- Timeline Screen -->
-            <div id="timeline-screen" class="timeline-screen hidden">
-                <h2 id="timeline-title" class="timeline-title">SIMULATING...</h2>
+        <!-- Timeline Screen -->
+        <div id="timeline-screen" class="timeline-screen hidden">
+            <h2 id="timeline-title" class="timeline-title noir-title-small">OPENING CASE FILES...</h2>
+
+            <div class="timeline-core">
                 <div id="timeline-container" class="timeline-container">
                     <!-- Events injected here by JS -->
                 </div>
-                <button id="restart-btn" class="restart-btn hidden">CHANGE HISTORY AGAIN</button>
             </div>
+
+            <button id="restart-btn" class="restart-btn noir-btn hidden">NEW INVESTIGATION</button>
         </div>
+    </div>
+
     <script src="../site.js"></script>
     <script src="whatif.js"></script>
 </body>

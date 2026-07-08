@@ -14,6 +14,10 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
     ? '/api/whatif' 
     : VERCEL_API_URL;
 
+function updateTitle(text) {
+    timelineTitle.textContent = text;
+}
+
 async function simulateTimeline(promptText) {
     // Hide setup, show timeline
     setupScreen.classList.add('hidden');
@@ -22,7 +26,7 @@ async function simulateTimeline(promptText) {
     restartBtn.classList.add('hidden');
     
     // Animate title
-    timelineTitle.textContent = "CONSULTING THE MULTIVERSE...";
+    updateTitle("GATHERING EVIDENCE...");
 
     let events = [];
     try {
@@ -63,17 +67,17 @@ async function simulateTimeline(promptText) {
 
     } catch (err) {
         console.error(err);
-        timelineTitle.textContent = "MULTIVERSE COLLAPSED (ERROR)";
+        updateTitle("CASE CLOSED (ERROR)");
         restartBtn.classList.remove('hidden');
         return;
     }
 
-    timelineTitle.textContent = "SIMULATING ALTERNATE TIMELINE...";
+    updateTitle("OPENING CASE FILES...");
     let eventIndex = 0;
 
     function revealNext() {
         if (eventIndex >= events.length) {
-            timelineTitle.textContent = "TIMELINE SECURE.";
+            updateTitle("INVESTIGATION COMPLETE.");
             restartBtn.classList.remove('hidden');
             return;
         }
@@ -86,11 +90,17 @@ async function simulateTimeline(promptText) {
         card.innerHTML = `
             <div class="event-year">YEAR ${ev.year}</div>
             <h3 class="event-title">${ev.title}</h3>
-            <img class="event-image" src="${ev.preloadedImage}" alt="${ev.title}" onerror="this.onerror=null; this.src='https://picsum.photos/seed/${Math.random()}/600/400';">
+            <div class="event-image-container">
+                <img class="event-image" src="${ev.preloadedImage}" alt="${ev.title}" onerror="this.onerror=null; this.src='https://picsum.photos/seed/${Math.random()}/600/400';">
+            </div>
             <p class="event-desc">${ev.desc}</p>
         `;
 
         timelineContainer.appendChild(card);
+        
+        // Trigger reflow to ensure the transition fires
+        void card.offsetWidth;
+        card.classList.add('revealed');
         
         // Auto-scroll to the newly added event
         setTimeout(() => {
