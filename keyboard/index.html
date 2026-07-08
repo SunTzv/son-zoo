@@ -4,39 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Son.zoo</title>
+    <title>Son.zoo - 3D Keyboard</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="keyboard.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/@tonejs/midi"></script>
 </head>
 
-<body class="keyboard-page">
-    <a href="../index.html" class="back-button">← GO BACK</a>
-
-    <main class="keyboard-stage" aria-label="12-note keyboard">
-        <section class="keyboard-shell">
-            <div class="keyboard-label">
-
-                <h1><span id="octave-count">12</span>-NOTE KEYBOARD</h1>
-                <div class="controls">
-                    <div class="volume-control">
-                        <button class="volume-knob" type="button" role="slider" aria-label="Volume" aria-valuemin="0"
-                            aria-valuemax="100" aria-valuenow="70" aria-valuetext="70 percent">
-                            <span class="knob-pointer"></span>
-                        </button>
-                        <output class="volume-display" aria-live="polite">70</output>
-                    </div>
-                    <div class="wave-control">
-                        <button id="wave-selector" class="wave-selector" type="button">
-                            SINE WAVE<br><small>(CLICK ME)</small>
-                        </button>
-                    </div>
-                    <button class="octave-toggle" type="button" aria-pressed="false">+2 OCTAVES</button>
-                </div>
-            </div>
-
-            <div class="keyboard" role="group" aria-label="Playable chromatic keyboard"></div>
-        </section>
-    </main>
+<body class="keyboard-page" oncontextmenu="return false;">
+    <a href="../index.html" class="back-button" style="position: absolute; z-index: 100; top: 1rem; left: 1rem;">← GO BACK</a>
+    <div id="loading-overlay" style="position: absolute; inset: 0; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; z-index: 50; font-family: monospace; font-size: 1.5rem;">LOADING 3D STAGE...</div>
+    <input type="file" id="midi-upload" accept=".mid,.midi" style="display: none;">
+    <canvas id="three-canvas"></canvas>
 
     <script src="../site.js"></script>
     <script src="keyboard.js"></script>
