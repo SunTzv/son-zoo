@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blowfish</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="blowfish.css">
+</head>
+<body>
+    <!-- Intro Cover -->
+    <div id="cover-screen" class="cover-screen">
+        <div class="cover-content">
+            <img src="../assets/blowfish.gif" alt="Blowfish" class="cover-gif">
+            <h1>BLOWFISH</h1>
+            <p class="subtitle">The engine that plays for 0.0</p>
+            <div class="controls-row">
+                <button id="start-btn" class="glass-btn primary">START GAME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Game UI -->
+    <div id="game-ui" class="game-ui hidden">
+        <div class="top-nav">
+            <h2>BLOWFISH</h2>
+            <a href="../index.html" class="back-link">← Return</a>
+        </div>
+        
+        <div class="main-layout">
+            
+            <!-- Left Column: Player Cards -->
+            <div class="left-column">
+                <div class="player-card glass-card">
+                    <div class="avatar-group">
+                        <div class="avatar"><img src="../assets/blowfish.gif" alt="Bot Avatar"></div>
+                        <div class="info">
+                            <div class="name">Blowfish</div>
+                            <div class="elo">0.0 Eval AI</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-card glass-card">
+                    <div class="avatar-group">
+                        <div class="avatar"><img src="../assets/chess_pieces/king-w.svg" alt="Player Avatar"></div>
+                        <div class="info">
+                            <div class="name">Player</div>
+                            <div class="elo">Human</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Column: Board -->
+            <div class="center-column">
+                <div class="board-container shadow-pop">
+                    <div id="chessboard" class="chessboard">
+                        <!-- Squares injected by JS -->
+                    </div>
+                    <div id="highlights-layer">
+                        <!-- Last move highlights and valid move dots -->
+                    </div>
+                    <div id="pieces-layer">
+                        <!-- Pieces injected by JS absolutely -->
+                    </div>
+                    <svg id="drawing-layer" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="4" markerHeight="4" refX="2.5" refY="2" orient="auto">
+                                <polygon points="0 0, 4 2, 0 4" fill="rgba(255, 170, 0, 0.8)" />
+                            </marker>
+                        </defs>
+                        <g id="draw-highlights"></g>
+                        <g id="draw-arrows"></g>
+                    </svg>
+                </div>
+                <div id="status-message" class="status-glass">Ready to play.</div>
+            </div>
+
+            <div class="sidebar-column glass-card">
+                <div class="move-log-container">
+                    <div class="move-log-header">Match History</div>
+                    <div id="move-log" class="move-log">
+                        <!-- Move history injected by JS -->
+                    </div>
+                    <div class="move-log-controls">
+                        <button id="btn-start" title="Go to start">⏮</button>
+                        <button id="btn-prev" title="Previous move">◀</button>
+                        <button id="btn-next" title="Next move">▶</button>
+                        <button id="btn-end" title="Go to end">⏭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="snd-move" src="../assets/sounds/move-self.mp3"></audio>
+    <audio id="snd-capture" src="../assets/sounds/capture.mp3"></audio>
+    <audio id="snd-check" src="../assets/sounds/move-check.mp3"></audio>
+    <audio id="snd-promote" src="../assets/sounds/promote.mp3"></audio>
+    <audio id="snd-start" src="../assets/sounds/game-start.mp3"></audio>
+    <audio id="snd-end" src="../assets/sounds/game-end.mp3"></audio>
+    <audio id="snd-illegal" src="../assets/sounds/illegal.mp3"></audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="blowfish.js"></script>
+</body>
+</html>
