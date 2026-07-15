@@ -15,6 +15,7 @@ let game = null;
 let engine = null;
 let isGameActive = false;
 let isPlayerTurn = true;
+let playerColor = 'w';
 let pieceElements = {}; // square -> DOM element
 
 // History / Move Log
@@ -85,7 +86,7 @@ function initBoardDOM(fen) {
     if (chessboard.children.length === 0) {
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
-                const squareId = String.fromCharCode(97 + c) + (8 - r);
+                const squareId = coordsToSq(c, r);
                 const isLight = (r + c) % 2 === 0;
                 const square = document.createElement("div");
                 square.className = `square ${isLight ? 'light' : 'dark'}`;
@@ -122,9 +123,20 @@ function setPiecePosition(elem, sq) {
     elem.dataset.square = sq;
 }
 
+function coordsToSq(c, r) {
+    if (playerColor === 'b') {
+        return String.fromCharCode(97 + (7 - c)) + (8 - (7 - r));
+    }
+    return String.fromCharCode(97 + c) + (8 - r);
+}
+
 function sqToCoords(sq) {
-    const c = sq.charCodeAt(0) - 97; // a -> 0
-    const r = 8 - parseInt(sq[1]);   // 8 -> 0
+    let c = sq.charCodeAt(0) - 97; // a -> 0
+    let r = 8 - parseInt(sq[1]);   // 8 -> 0
+    if (playerColor === 'b') {
+        c = 7 - c;
+        r = 7 - r;
+    }
     return { c, r };
 }
 
@@ -316,7 +328,7 @@ function botMove() {
     // Reset state for new move
     engineState = { maxDepth: 0, moves: {} };
 
-    let thinkTime = Math.random() * 10000 + 10000; // Between 10 to 20 seconds
+    let thinkTime = Math.random() * 1500 + 1000; // Between 1 to 2.5 seconds
     
     // Stop any existing search just in case
     engine.postMessage("stop");
@@ -403,7 +415,7 @@ engine.onmessage = function(event) {
                     if (pMove) {
                         executeMoveVisually(pMove);
                         isPlayerTurn = false;
-                        statusMessage.textContent = "Blowfish is thinking...";
+                        statusMessage.textContent = "";
                         botMove();
                     } else {
                         sounds.illegal.currentTime = 0; sounds.illegal.play();
@@ -422,11 +434,27 @@ engine.onmessage = function(event) {
 // ----------------------------------------------------
 
 startBtn.addEventListener("click", () => {
-    
+    const colorSel = document.getElementById('color-select').value;
+    if (colorSel === 'random') {
+        playerColor = Math.random() > 0.5 ? 'w' : 'b';
+    } else {
+        playerColor = colorSel === 'white' ? 'w' : 'b';
+    }
+
+    const playerAvatar = document.getElementById('avatar-player');
+    if (playerColor === 'b') {
+        playerAvatar.src = '../assets/chess_pieces/king-b.svg';
+    } else {
+        playerAvatar.src = '../assets/chess_pieces/king-w.svg';
+    }
+
+    const copyBtn = document.getElementById('btn-copy-pgn');
+    if (copyBtn) copyBtn.style.display = "none";
     // Config Bot for MultiPV and high skill (so it evaluates accurately to find 0.0)
     engine.postMessage("uci");
     engine.postMessage("setoption name Skill Level value 20");
-    engine.postMessage("setoption name MultiPV value 15");
+    engine.postMessage("setoption name MultiPV value 50");
+    engine.postMessage("setoption name Hash value 256");
     engine.postMessage("ucinewgame");
     
     // Hide cover screen
@@ -439,6 +467,9 @@ startBtn.addEventListener("click", () => {
     currentHistoryIndex = 0;
     renderMoveLog();
     
+    // Clear chessboard so it recreates squares if color changed
+    document.getElementById("chessboard").innerHTML = "";
+    
     initBoardDOM(game.fen());
     clearHighlights();
     clearArrows();
@@ -446,20 +477,40 @@ startBtn.addEventListener("click", () => {
     activePremove = null;
     
     isGameActive = true;
-    isPlayerTurn = true;
-    statusMessage.textContent = "Your turn.";
+    isPlayerTurn = playerColor === 'w';
+    statusMessage.textContent = isPlayerTurn ? "Your turn." : "";
     sounds.start.currentTime = 0; sounds.start.play();
     
-    timeActive = true;
+    if (!isPlayerTurn) {
+        botMove();
+    }
 });
+
+const btnCopyPgn = document.getElementById('btn-copy-pgn');
+if (btnCopyPgn) {
+    btnCopyPgn.addEventListener('click', () => {
+        navigator.clipboard.writeText(game.pgn());
+        btnCopyPgn.textContent = "COPIED!";
+        setTimeout(() => { btnCopyPgn.textContent = "COPY PGN"; }, 2000);
+    });
+}
+
+const btnResign = document.getElementById('btn-resign');
+if (btnResign) {
+    btnResign.addEventListener('click', () => {
+        if (!isGameActive) return;
+        endGame("You Resigned. Blowfish wins!");
+    });
+}
 
 function checkGameOver() {
     if (game.game_over()) {
         isGameActive = false;
-        timeActive = false;
         if (game.in_checkmate()) statusMessage.textContent = isPlayerTurn ? "Checkmate! Blowfish wins." : "Checkmate! You win!";
         else if (game.in_draw()) statusMessage.textContent = "Draw!";
         else statusMessage.textContent = "Game Over";
+        
+        if (btnCopyPgn) btnCopyPgn.style.display = "block";
     }
 }
 
@@ -496,10 +547,8 @@ function attemptMove(from, to) {
         if (move) {
             executeMoveVisually(move);
             
-            wTime += wInc; // Increment player clock
-            
             isPlayerTurn = false;
-            statusMessage.textContent = "Blowfish is thinking...";
+            statusMessage.textContent = "";
             checkGameOver();
             
             if (isGameActive) {
@@ -547,7 +596,7 @@ function onDragStart(e) {
     const pElem = e.target;
     const sq = pElem.dataset.square;
     const piece = game.get(sq);
-    if (!piece || piece.color !== 'w') return;
+    if (!piece || piece.color !== playerColor) return;
 
     // Disallow if viewing history
     if (currentHistoryIndex !== fenHistory.length - 1) return;
@@ -709,9 +758,9 @@ function onSquareClick(sq) {
         }
     }
 
-    // Only allow selecting White pieces for player (unless we're observing, but player is always white)
+    // Only allow selecting pieces matching player color
     const piece = game.get(sq);
-    if (piece && piece.color === 'w') {
+    if (piece && piece.color === playerColor) {
         selectedSquare = sq;
         drawValidMoves(sq);
     } else {
@@ -761,7 +810,7 @@ function getSquareFromEvent(e) {
     if (x < 0 || y < 0 || x >= rect.width || y >= rect.height) return null;
     const c = Math.floor((x / rect.width) * 8);
     const r = Math.floor((y / rect.height) * 8);
-    return String.fromCharCode(97 + c) + (8 - r);
+    return coordsToSq(c, r);
 }
 
 document.querySelector('.board-container').addEventListener('contextmenu', e => {

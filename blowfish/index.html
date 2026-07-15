@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blowfish</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="blowfish.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="blowfish.css?v=22">
 </head>
 <body>
     <!-- Intro Cover -->
@@ -14,6 +14,14 @@
             <img src="../assets/blowfish.gif" alt="Blowfish" class="cover-gif">
             <h1>BLOWFISH</h1>
             <p class="subtitle">The engine that plays for 0.0</p>
+            <div class="color-select-container" style="margin-bottom: 20px;">
+                <label for="color-select" style="color: white; margin-right: 10px;">Play as:</label>
+                <select id="color-select" class="glass-select" style="padding: 10px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+                    <option value="white">White</option>
+                    <option value="black">Black</option>
+                    <option value="random">Random</option>
+                </select>
+            </div>
             <div class="controls-row">
                 <button id="start-btn" class="glass-btn primary">START GAME</button>
             </div>
@@ -29,56 +37,63 @@
         
         <div class="main-layout">
             
-            <!-- Left Column: Player Cards -->
-            <div class="left-column">
-                <div class="player-card glass-card">
-                    <div class="avatar-group">
-                        <div class="avatar"><img src="../assets/blowfish.gif" alt="Bot Avatar"></div>
-                        <div class="info">
-                            <div class="name">Blowfish</div>
-                            <div class="elo">0.0 Eval AI</div>
+            <div class="game-grid">
+                <!-- ROW 1: Top Elements -->
+                
+                <!-- Opponent Card (Grid 1x1) -->
+                <div class="chat-bubble down-bubble down-left-bubble opponent-bubble">
+                    <div class="avatar"><img id="avatar-opponent" src="../assets/blowfish.gif" alt="Opponent Avatar"></div>
+                    <div class="info">
+                        <div class="name">Blowfish</div>
+                        <div class="elo">0.0 Eval AI</div>
+                    </div>
+                </div>
+
+                <!-- Status Indicator (Grid 1x2) -->
+                <div class="status-banner shadow-pop">
+                    <div id="status-message">Ready to play.</div>
+                </div>
+
+                <!-- Player Card (Grid 1x3) -->
+                <div class="chat-bubble down-bubble down-right-bubble player-bubble">
+                    <div class="info text-right">
+                        <div class="name">Player</div>
+                        <div class="elo">Human</div>
+                    </div>
+                    <div class="avatar"><img id="avatar-player" src="../assets/chess_pieces/king-w.svg" alt="Player Avatar"></div>
+                </div>
+
+
+                <!-- ROW 2: Middle Elements -->
+
+                <!-- Center Column (Board - Grid 2x2) -->
+                <div class="board-frame shadow-pop">
+                    <div class="corner-decor top-right"></div>
+                    <div class="corner-decor bottom-left"></div>
+                    <div class="board-container">
+                        <div id="chessboard" class="chessboard">
+                            <!-- Squares injected by JS -->
                         </div>
-                    </div>
-                </div>
-
-                <div class="player-card glass-card">
-                    <div class="avatar-group">
-                        <div class="avatar"><img src="../assets/chess_pieces/king-w.svg" alt="Player Avatar"></div>
-                        <div class="info">
-                            <div class="name">Player</div>
-                            <div class="elo">Human</div>
+                        <div id="highlights-layer">
+                            <!-- Last move highlights and valid move dots -->
                         </div>
+                        <div id="pieces-layer">
+                            <!-- Pieces injected by JS absolutely -->
+                        </div>
+                        <svg id="drawing-layer" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="4" markerHeight="4" refX="2.5" refY="2" orient="auto">
+                                    <polygon points="0 0, 4 2, 0 4" fill="rgba(255, 170, 0, 0.8)" />
+                                </marker>
+                            </defs>
+                            <g id="draw-highlights"></g>
+                            <g id="draw-arrows"></g>
+                        </svg>
                     </div>
                 </div>
-            </div>
 
-            <!-- Center Column: Board -->
-            <div class="center-column">
-                <div class="board-container shadow-pop">
-                    <div id="chessboard" class="chessboard">
-                        <!-- Squares injected by JS -->
-                    </div>
-                    <div id="highlights-layer">
-                        <!-- Last move highlights and valid move dots -->
-                    </div>
-                    <div id="pieces-layer">
-                        <!-- Pieces injected by JS absolutely -->
-                    </div>
-                    <svg id="drawing-layer" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <marker id="arrowhead" markerWidth="4" markerHeight="4" refX="2.5" refY="2" orient="auto">
-                                <polygon points="0 0, 4 2, 0 4" fill="rgba(255, 170, 0, 0.8)" />
-                            </marker>
-                        </defs>
-                        <g id="draw-highlights"></g>
-                        <g id="draw-arrows"></g>
-                    </svg>
-                </div>
-                <div id="status-message" class="status-glass">Ready to play.</div>
-            </div>
-
-            <div class="sidebar-column glass-card">
-                <div class="move-log-container">
+                <!-- Move History (Right - Grid 2x3) -->
+                <div class="history-pill shadow-pop">
                     <div class="move-log-header">Match History</div>
                     <div id="move-log" class="move-log">
                         <!-- Move history injected by JS -->
@@ -90,7 +105,29 @@
                         <button id="btn-end" title="Go to end">⏭</button>
                     </div>
                 </div>
+
+
+                <!-- ROW 3: Bottom Elements -->
+                <div class="controls-pill shadow-pop">
+                    <button id="btn-resign" class="icon-btn" title="Resign">
+                        <img src="../assets/flag.svg" alt="Resign" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ff8fab\'><path d=\'M14.4,6L14,4H5v17h2v-7h5.6l0.4,2h7V6H14.4z\'/></svg>'">
+                        <span>Resign</span>
+                    </button>
+                    <button id="btn-draw" class="icon-btn" title="Draw">
+                        <img src="../assets/handshake.svg" alt="Draw" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ff8fab\'><path d=\'M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M11,19.93c-3.95-0.49-7-3.85-7-7.93c0-0.62,0.08-1.22,0.21-1.79L9,15v1c0,1.1,0.9,2,2,2V19.93z M17.9,17.39c-0.26-0.81-1-1.39-1.9-1.39h-1v-3c0-0.55-0.45-1-1-1H8v-2h2c0.55,0,1-0.45,1-1V7h2c1.1,0,2-0.9,2-2v-0.41c2.93,1.19,5,4.06,5,7.41C20,13.87,19.24,15.82,17.9,17.39z\'/></svg>'">
+                        <span>Draw</span>
+                    </button>
+                    <button id="btn-options" class="icon-btn" title="Options">
+                        <img src="../assets/settings.svg" alt="Options" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ff8fab\'><path d=\'M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z\'/></svg>'">
+                        <span>Options</span>
+                    </button>
+                    <button id="btn-help" class="icon-btn" title="Help">
+                        <img src="../assets/help.svg" alt="Help" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ff8fab\'><path d=\'M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M13,19h-2v-2h2V19z M15.07,11.25l-0.9,0.92 C13.45,12.9,13,13.5,13,15h-2v-0.5c0-1.1,0.45-2.1,1.17-2.83l1.24-1.26c0.37-0.36,0.59-0.86,0.59-1.41c0-1.1-0.9-2-2-2 s-2,0.9-2,2H8c0-2.21,1.79-4,4-4s4,1.79,4,4C16,9.88,15.65,10.68,15.07,11.25z\'/></svg>'">
+                        <span>Help</span>
+                    </button>
+                </div>
             </div>
+
         </div>
     </div>
 
@@ -104,6 +141,6 @@
     <audio id="snd-illegal" src="../assets/sounds/illegal.mp3"></audio>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    <script src="blowfish.js"></script>
+    <script src="blowfish.js?v=5"></script>
 </body>
 </html>
