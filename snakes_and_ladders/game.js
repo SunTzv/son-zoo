@@ -26,7 +26,7 @@ let movingPiece = null;
 let currentRoll = 0;
 let validPieces = [];
 
-let gameState = 'START_MENU'; 
+let gameState = 'START_MENU';
 let time = 0;
 let boardAlpha = 1.0;
 let animatingWin = false;
@@ -37,7 +37,7 @@ let winPhase = 0; // 0: gameplay, 1: wave up, 2: form letters
 let peer = null;
 let conn = null;
 let gameMode = 'pve'; // pve, local, online-host, online-join
-let myPlayerIdx = 0; 
+let myPlayerIdx = 0;
 let targetSnakeFormations = [];
 
 const COLORS = {
@@ -51,30 +51,30 @@ const COLORS = {
 };
 
 const LETTER_SHAPES = {
-    'Y': [[0,0, 10,15, 10,30, 10,30], [20,0, 10,15, 10,15, 10,15]],
-    'O': [[10,0, 20,15, 10,30, 0,15]],
-    'U': [[0,0, 0,20, 10,30, 20,0]],
-    'W': [[0,0, 5,30, 10,15, 10,15], [10,15, 15,30, 20,0, 20,0]],
-    'I': [[10,0, 10,10, 10,20, 10,30]],
-    'N': [[0,30, 0,0, 20,30, 20,0]],
-    'S': [[20,0, 0,0, 20,30, 0,30]],
-    'B': [[0,30, 0,0, 20,15, 0,30]],
-    'T': [[0,0, 20,0, 10,0, 10,30]],
-    'P': [[0,30, 0,0, 20,10, 0,20]],
-    '1': [[0,10, 10,0, 10,30, 10,30]],
-    '2': [[0,0, 20,0, 0,30, 20,30]],
-    '!': [[10,0, 10,20, 10,20, 10,20], [10,27, 10,30, 10,30, 10,30]],
+    'Y': [[0, 0, 10, 15, 10, 30, 10, 30], [20, 0, 10, 15, 10, 15, 10, 15]],
+    'O': [[10, 0, 20, 15, 10, 30, 0, 15]],
+    'U': [[0, 0, 0, 20, 10, 30, 20, 0]],
+    'W': [[0, 0, 5, 30, 10, 15, 10, 15], [10, 15, 15, 30, 20, 0, 20, 0]],
+    'I': [[10, 0, 10, 10, 10, 20, 10, 30]],
+    'N': [[0, 30, 0, 0, 20, 30, 20, 0]],
+    'S': [[20, 0, 0, 0, 20, 30, 0, 30]],
+    'B': [[0, 30, 0, 0, 20, 15, 0, 30]],
+    'T': [[0, 0, 20, 0, 10, 0, 10, 30]],
+    'P': [[0, 30, 0, 0, 20, 10, 0, 20]],
+    '1': [[0, 10, 10, 0, 10, 30, 10, 30]],
+    '2': [[0, 0, 20, 0, 0, 30, 20, 30]],
+    '!': [[10, 0, 10, 20, 10, 20, 10, 20], [10, 27, 10, 30, 10, 30, 10, 30]],
     ' ': []
 };
 
 // UI Navigation
 let currentModeSelect = null;
-window.navMenu = function(target, mode) {
+window.navMenu = function (target, mode) {
     document.getElementById('menu-main').classList.add('hidden');
     document.getElementById('menu-online').classList.add('hidden');
     document.getElementById('menu-pieces').classList.add('hidden');
     document.getElementById('menu-lobby').classList.add('hidden');
-    
+
     if (target === 'main') {
         document.getElementById('menu-main').classList.remove('hidden');
         if (peer) { peer.destroy(); peer = null; }
@@ -82,22 +82,22 @@ window.navMenu = function(target, mode) {
         document.getElementById('menu-online').classList.remove('hidden');
     } else if (target === 'pieces') {
         document.getElementById('menu-pieces').classList.remove('hidden');
-        if (mode) currentModeSelect = mode; 
+        if (mode) currentModeSelect = mode;
     }
 };
 
-window.joinLobby = function() {
+window.joinLobby = function () {
     let id = document.getElementById('join-id').value.trim();
     if (!id) return;
     document.getElementById('network-status').innerText = "Connecting...";
-    
+
     gameMode = 'online-join';
     players[0].name = "Opponent (P1)";
     players[1].name = "You (P2)";
     players[1].type = 'human';
     document.getElementById('label-player2').innerText = "Your Base";
     myPlayerIdx = 1;
-    
+
     peer = new Peer();
     peer.on('open', () => {
         conn = peer.connect(id);
@@ -105,7 +105,7 @@ window.joinLobby = function() {
     });
 };
 
-window.cancelLobby = function() {
+window.cancelLobby = function () {
     navMenu('main');
 };
 
@@ -118,7 +118,7 @@ function setupConnection(hostPieces) {
             document.getElementById('network-status').innerText = "Connected! Waiting for host...";
         }
     });
-    
+
     conn.on('data', data => {
         if (data.type === 'start') {
             startActualGame(data.pieces);
@@ -132,11 +132,17 @@ function setupConnection(hostPieces) {
             applySnakeShift(data);
         } else if (data.type === 'shift_ladder') {
             applyLadderShift(data);
+        } else if (data.type === 'shrink_snake') {
+            applySnakeShrink(data);
+        } else if (data.type === 'grow_tail_snake') {
+            applySnakeGrowTail(data);
+        } else if (data.type === 'reverse_snake') {
+            applySnakeReverse(data);
         }
     });
 }
 
-window.startGame = function(pieces) {
+window.startGame = function (pieces) {
     if (currentModeSelect === 'pve') {
         gameMode = 'pve';
         players[0].name = "You";
@@ -159,10 +165,10 @@ window.startGame = function(pieces) {
         players[1].type = 'human';
         myPlayerIdx = 0;
         document.getElementById('label-player2').innerText = "Opponent Base";
-        
+
         document.getElementById('menu-pieces').classList.add('hidden');
         document.getElementById('menu-lobby').classList.remove('hidden');
-        
+
         let otp = Math.floor(1000 + Math.random() * 9000).toString();
         peer = new Peer(otp);
         peer.on('open', id => {
@@ -180,7 +186,7 @@ function startActualGame(count) {
     initCells();
     initPieces(count);
     initEntities();
-    
+
     gameState = 'IDLE';
     updateTurnUI();
     requestAnimationFrame(gameLoop);
@@ -234,10 +240,10 @@ function initPieces(count) {
             domEl.style.backgroundColor = player.color;
             player.baseEl.appendChild(domEl);
 
-            let piece = { 
-                id: i, sq: 0, targetSq: 0, 
-                px: 0, py: 0, 
-                animating: false, ridingEntity: false, playerIdx: pIdx, domEl: domEl 
+            let piece = {
+                id: i, sq: 0, targetSq: 0,
+                px: 0, py: 0,
+                animating: false, ridingEntity: false, playerIdx: pIdx, domEl: domEl
             };
             player.pieces.push(piece);
 
@@ -273,22 +279,22 @@ function createSnake() {
     let attempts = 0;
     while (attempts < 50) {
         attempts++;
-        head = Math.floor(Math.random() * 70) + 20; 
+        head = Math.floor(Math.random() * 70) + 20;
         if (isOccupied(head)) continue;
-        
+
         segments = [head];
         let curr = head;
         let valid = true;
-        
+
         for (let i = 0; i < 3; i++) {
-            let adjs = getAdjacentIds(curr).filter(id => !isOccupied(id) && !segments.includes(id) && id < curr); 
+            let adjs = getAdjacentIds(curr).filter(id => !isOccupied(id) && !segments.includes(id) && id < curr);
             if (adjs.length === 0) adjs = getAdjacentIds(curr).filter(id => !isOccupied(id) && !segments.includes(id));
             if (adjs.length === 0) { valid = false; break; }
             let next = adjs[Math.floor(Math.random() * adjs.length)];
             segments.push(next);
             curr = next;
         }
-        
+
         if (valid && segments.length >= 4) {
             let visSegments = segments.map(sq => {
                 let c = getCell(sq);
@@ -297,8 +303,8 @@ function createSnake() {
             return { type: 'snake', segments, visSegments, growNext: false };
         }
     }
-    let h = Math.floor(Math.random()*40)+40;
-    return { type: 'snake', segments: [h, h-1, h-2, h-3], visSegments: [getCell(h), getCell(h-1), getCell(h-2), getCell(h-3)].map(c => ({cx:c.cx, cy:c.cy})), growNext: false };
+    let h = Math.floor(Math.random() * 40) + 40;
+    return { type: 'snake', segments: [h, h - 1, h - 2, h - 3], visSegments: [getCell(h), getCell(h - 1), getCell(h - 2), getCell(h - 3)].map(c => ({ cx: c.cx, cy: c.cy })), growNext: false };
 }
 
 function createLadder() {
@@ -310,10 +316,10 @@ function createLadder() {
         attempts++;
         if (attempts > 50) break;
     } while (Math.abs(start - end) < 10 || isOccupied(start) || isOccupied(end));
-    
+
     let startCell = getCell(start);
     let endCell = getCell(end);
-    
+
     return {
         type: 'ladder',
         start: start, end: end,
@@ -347,13 +353,35 @@ function applyLadderShift(data) {
     else entity.end = data.newSq;
 }
 
+function applySnakeShrink(data) {
+    let entity = snakes[data.idx];
+    if (entity.segments.length > 2) {
+        entity.segments.pop();
+        entity.visSegments.pop();
+    }
+}
+
+function applySnakeGrowTail(data) {
+    let entity = snakes[data.idx];
+    entity.segments.push(data.next);
+    let cell = getCell(data.next);
+    // Add the new tail visually exactly where it is so it doesn't snap wildly
+    entity.visSegments.push({ cx: cell.cx, cy: cell.cy });
+}
+
+function applySnakeReverse(data) {
+    let entity = snakes[data.idx];
+    entity.segments.reverse();
+    entity.visSegments.reverse();
+}
+
 function shiftEntities() {
     if (gameState === 'WIN_ANIMATION') return;
     if (gameMode === 'online-join') return; // Only host shifts
     if (Math.random() > 0.09) return;
     let pool = snakes.concat(ladders);
     if (pool.length === 0) return;
-    
+
     let entityIdx = Math.floor(Math.random() * pool.length);
     let entity = pool[entityIdx];
 
@@ -366,6 +394,25 @@ function shiftEntities() {
             let grow = entity.growNext;
             applySnakeShift({ idx: sIdx, next: next, growNext: grow });
             if (conn && gameMode === 'online-host') conn.send({ type: 'shift_snake', idx: sIdx, next, growNext: grow });
+        } else {
+            // Snake is blocked! Decrease or increase length to maneuver out.
+            let sIdx = snakes.indexOf(entity);
+            if (entity.segments.length > 2 && Math.random() > 0.5) {
+                applySnakeShrink({ idx: sIdx });
+                if (conn && gameMode === 'online-host') conn.send({ type: 'shrink_snake', idx: sIdx });
+            } else {
+                let tail = entity.segments[entity.segments.length - 1];
+                let tailAdjs = getAdjacentIds(tail).filter(id => !isOccupied(id));
+                if (tailAdjs.length > 0) {
+                    let newTail = tailAdjs[Math.floor(Math.random() * tailAdjs.length)];
+                    applySnakeGrowTail({ idx: sIdx, next: newTail });
+                    if (conn && gameMode === 'online-host') conn.send({ type: 'grow_tail_snake', idx: sIdx, next: newTail });
+                } else {
+                    // Completely blocked at both ends! Slither backwards!
+                    applySnakeReverse({ idx: sIdx });
+                    if (conn && gameMode === 'online-host') conn.send({ type: 'reverse_snake', idx: sIdx });
+                }
+            }
         }
     } else {
         let shiftStart = Math.random() > 0.5;
@@ -373,10 +420,10 @@ function shiftEntities() {
         let newSq;
 
         if (Math.random() > 0.85) {
-            newSq = Math.floor(Math.random() * 98) + 2; 
+            newSq = Math.floor(Math.random() * 98) + 2;
         } else {
             let cr = getColRow(oldSq);
-            let dirs = [{c:1,r:0}, {c:-1,r:0}, {c:0,r:1}, {c:0,r:-1}];
+            let dirs = [{ c: 1, r: 0 }, { c: -1, r: 0 }, { c: 0, r: 1 }, { c: 0, r: -1 }];
             let d = dirs[Math.floor(Math.random() * dirs.length)];
             newSq = getId(cr.col + d.c, cr.row + d.r);
         }
@@ -384,7 +431,7 @@ function shiftEntities() {
         if (!newSq || newSq < 2 || newSq > 99) return;
         if (shiftStart && newSq >= entity.end - 5) return;
         if (!shiftStart && newSq <= entity.start + 5) return;
-        
+
         let occ = getOccupiedCells();
         occ.delete(oldSq);
         if (occ.has(newSq)) return;
@@ -397,7 +444,7 @@ function shiftEntities() {
 
 function updatePhysics() {
     time += 0.05;
-    
+
     if (gameState === 'WIN_ANIMATION') {
         if (winPhase === 1) { // Wave up
             let allExited = true;
@@ -418,7 +465,7 @@ function updatePhysics() {
                 }
             }
         }
-        return; 
+        return;
     }
 
     shiftEntities();
@@ -438,7 +485,7 @@ function updatePhysics() {
                         p.targetSq = snake.segments[snake.segments.length - 1];
                         p.ridingEntity = true;
                         p.animating = true;
-                        snake.growNext = true; 
+                        snake.growNext = true;
                     }
                 }
             }
@@ -454,7 +501,7 @@ function updatePhysics() {
             }
         }
     }
-    
+
     for (let l of ladders) {
         let sc = getCell(l.start);
         let ec = getCell(l.end);
@@ -473,7 +520,7 @@ function updatePhysics() {
             } else {
                 p.domEl.style.display = 'none';
                 p.domEl.classList.remove('selectable');
-                
+
                 let targetCell = getCell(p.sq);
                 if (p.px === 0 && p.py === 0) {
                     p.px = targetCell.cx; p.py = targetCell.cy;
@@ -484,7 +531,7 @@ function updatePhysics() {
                         let finalCell = getCell(p.targetSq);
                         let dx = finalCell.cx - p.px;
                         let dy = finalCell.cy - p.py;
-                        p.px += dx * 0.05; 
+                        p.px += dx * 0.05;
                         p.py += dy * 0.05;
                         if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
                             p.px = finalCell.cx; p.py = finalCell.cy;
@@ -495,7 +542,7 @@ function updatePhysics() {
                     } else {
                         let dx = targetCell.cx - p.px;
                         let dy = targetCell.cy - p.py;
-                        p.px += dx * 0.1; 
+                        p.px += dx * 0.1;
                         p.py += dy * 0.1;
                         if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
                             p.px = targetCell.cx; p.py = targetCell.cy;
@@ -513,8 +560,8 @@ function updatePhysics() {
 function setupWinLetters() {
     winPhase = 2;
     // Generate extra snakes if needed
-    while (snakes.length < 15) snakes.push({ type: 'snake', segments: [], visSegments: [{},{},{},{}], winSnake: true });
-    
+    while (snakes.length < 15) snakes.push({ type: 'snake', segments: [], visSegments: [{}, {}, {}, {}], winSnake: true });
+
     let msg = winPlayerIdx === 0 ? "YOU WIN" : "BOT WINS";
     if (gameMode === 'local' || gameMode.startsWith('online')) {
         msg = winPlayerIdx === 0 ? "P1 WINS" : "P2 WINS";
@@ -530,17 +577,17 @@ function setupWinLetters() {
         let shapes = LETTER_SHAPES[char] || LETTER_SHAPES['I'];
         for (let shape of shapes) {
             if (snakeIdx >= snakes.length) break;
-            
+
             let pts = [];
             for (let i = 0; i < shape.length; i += 2) {
-                pts.push({ x: startX + shape[i] * 1.5, y: startY + shape[i+1] * 1.5 });
+                pts.push({ x: startX + shape[i] * 1.5, y: startY + shape[i + 1] * 1.5 });
             }
-            
+
             // Pad points if snake is longer than 4 (rare but just in case)
             while (pts.length < 10) pts.push(pts[pts.length - 1]);
 
             targetSnakeFormations.push(pts);
-            
+
             // Teleport snake to bottom
             let s = snakes[snakeIdx];
             s.visSegments = pts.map(p => ({ cx: p.x, cy: p.y + 400 + Math.random() * 200 }));
@@ -551,7 +598,7 @@ function setupWinLetters() {
 
     // Hide remaining snakes
     for (; snakeIdx < snakes.length; snakeIdx++) {
-        targetSnakeFormations.push([{x:-100, y:-100}, {x:-100, y:-100}, {x:-100, y:-100}, {x:-100, y:-100}]);
+        targetSnakeFormations.push([{ x: -100, y: -100 }, { x: -100, y: -100 }, { x: -100, y: -100 }, { x: -100, y: -100 }]);
     }
 }
 
@@ -560,7 +607,7 @@ function drawBoard() {
         boardAlpha -= 0.02;
         if (boardAlpha < 0) boardAlpha = 0;
     }
-    
+
     // Draw Sky
     ctx.fillStyle = '#bae6fd';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -575,29 +622,29 @@ function drawBoard() {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     let c1x = (time * 15) % (canvas.width + 200) - 100;
     ctx.beginPath();
-    ctx.arc(c1x, 120, 30, 0, Math.PI*2);
-    ctx.arc(c1x + 40, 110, 40, 0, Math.PI*2);
-    ctx.arc(c1x + 80, 120, 30, 0, Math.PI*2);
+    ctx.arc(c1x, 120, 30, 0, Math.PI * 2);
+    ctx.arc(c1x + 40, 110, 40, 0, Math.PI * 2);
+    ctx.arc(c1x + 80, 120, 30, 0, Math.PI * 2);
     ctx.fill();
 
     let c2x = (time * 8 + 300) % (canvas.width + 200) - 100;
     ctx.beginPath();
-    ctx.arc(c2x, 250, 40, 0, Math.PI*2);
-    ctx.arc(c2x + 50, 230, 50, 0, Math.PI*2);
-    ctx.arc(c2x + 100, 250, 40, 0, Math.PI*2);
+    ctx.arc(c2x, 250, 40, 0, Math.PI * 2);
+    ctx.arc(c2x + 50, 230, 50, 0, Math.PI * 2);
+    ctx.arc(c2x + 100, 250, 40, 0, Math.PI * 2);
     ctx.fill();
 
     // Draw Trees
     function drawTree(tx, ty) {
-        ctx.fillStyle = '#78350f'; 
+        ctx.fillStyle = '#78350f';
         ctx.fillRect(tx - 10, ty - 40, 20, 40);
-        ctx.fillStyle = '#16a34a'; 
+        ctx.fillStyle = '#16a34a';
         ctx.beginPath();
         ctx.moveTo(tx - 40, ty - 30); ctx.lineTo(tx, ty - 100); ctx.lineTo(tx + 40, ty - 30); ctx.fill();
         ctx.beginPath();
         ctx.moveTo(tx - 30, ty - 70); ctx.lineTo(tx, ty - 130); ctx.lineTo(tx + 30, ty - 70); ctx.fill();
     }
-    
+
     drawTree(100, canvas.height);
     drawTree(300, canvas.height);
     drawTree(500, canvas.height);
@@ -640,7 +687,7 @@ function drawEntities() {
             let dist = Math.sqrt(dx * dx + dy * dy);
             let nx = -dy / dist * 12; let ny = dx / dist * 12;
 
-            ctx.strokeStyle = COLORS.ladderRung; 
+            ctx.strokeStyle = COLORS.ladderRung;
             ctx.lineWidth = 10;
             let steps = Math.floor(dist / 30);
             ctx.beginPath();
@@ -651,7 +698,7 @@ function drawEntities() {
             }
             ctx.stroke();
 
-            ctx.strokeStyle = COLORS.ladder; 
+            ctx.strokeStyle = COLORS.ladder;
             ctx.lineWidth = 14;
             ctx.beginPath();
             ctx.moveTo(l.visStartX + nx, l.visStartY + ny);
@@ -668,21 +715,21 @@ function drawEntities() {
             if (boardAlpha <= 0 && winPhase === 1) continue; // Hide snakes if wave is done
 
             ctx.globalAlpha = (gameState === 'WIN_ANIMATION') ? 1.0 : boardAlpha;
-            ctx.strokeStyle = COLORS.snake; 
-            ctx.lineWidth = 26; 
+            ctx.strokeStyle = COLORS.snake;
+            ctx.lineWidth = 26;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
             ctx.beginPath();
-            
+
             let pts = s.visSegments;
             ctx.moveTo(pts[0].cx, pts[0].cy);
             if (pts.length > 2) {
                 for (let j = 1; j < pts.length - 1; j++) {
-                    let xc = (pts[j].cx + pts[j+1].cx) / 2;
-                    let yc = (pts[j].cy + pts[j+1].cy) / 2;
+                    let xc = (pts[j].cx + pts[j + 1].cx) / 2;
+                    let yc = (pts[j].cy + pts[j + 1].cy) / 2;
                     ctx.quadraticCurveTo(pts[j].cx, pts[j].cy, xc, yc);
                 }
-                ctx.lineTo(pts[pts.length-1].cx, pts[pts.length-1].cy);
+                ctx.lineTo(pts[pts.length - 1].cx, pts[pts.length - 1].cy);
             } else if (pts.length === 2) {
                 ctx.lineTo(pts[1].cx, pts[1].cy);
             }
@@ -692,23 +739,23 @@ function drawEntities() {
             ctx.beginPath();
             ctx.arc(pts[0].cx, pts[0].cy, 20, 0, Math.PI * 2);
             ctx.fill();
-            
+
             let dx = 0, dy = -1;
             if (pts.length > 1) {
                 dx = pts[0].cx - pts[1].cx;
                 dy = pts[0].cy - pts[1].cy;
-                let len = Math.sqrt(dx*dx + dy*dy);
+                let len = Math.sqrt(dx * dx + dy * dy);
                 if (len > 0) { dx /= len; dy /= len; }
             }
-            let nx = -dy * 8, ny = dx * 8; 
-            
+            let nx = -dy * 8, ny = dx * 8;
+
             ctx.fillStyle = '#fff'; ctx.beginPath();
-            ctx.arc(pts[0].cx + nx + dx*4, pts[0].cy + ny + dy*4, 5, 0, Math.PI * 2);
-            ctx.arc(pts[0].cx - nx + dx*4, pts[0].cy - ny + dy*4, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.arc(pts[0].cx + nx + dx * 4, pts[0].cy + ny + dy * 4, 5, 0, Math.PI * 2);
+            ctx.arc(pts[0].cx - nx + dx * 4, pts[0].cy - ny + dy * 4, 5, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#000'; ctx.beginPath();
-            ctx.arc(pts[0].cx + nx + dx*6, pts[0].cy + ny + dy*6, 2, 0, Math.PI * 2);
-            ctx.arc(pts[0].cx - nx + dx*6, pts[0].cy - ny + dy*6, 2, 0, Math.PI * 2); ctx.fill();
-            
+            ctx.arc(pts[0].cx + nx + dx * 6, pts[0].cy + ny + dy * 6, 2, 0, Math.PI * 2);
+            ctx.arc(pts[0].cx - nx + dx * 6, pts[0].cy - ny + dy * 6, 2, 0, Math.PI * 2); ctx.fill();
+
             ctx.globalAlpha = 1.0;
         }
     }
@@ -761,7 +808,7 @@ function drawPlayers() {
 
 function gameLoop() {
     if (gameState === 'START_MENU') return;
-    
+
     updatePhysics();
     drawBoard();
     drawEntities();
@@ -832,10 +879,10 @@ function endTurn() {
 }
 
 // fromBtn determines if it was initiated manually vs from a sync packet
-window.executeRoll = function(fromBtn) {
+window.executeRoll = function (fromBtn) {
     if (gameState !== 'IDLE') return;
     if (gameMode.startsWith('online') && currentPlayerIdx !== myPlayerIdx) return;
-    
+
     triggerRollVisuals(false);
 };
 
@@ -844,12 +891,12 @@ function triggerRollVisuals(fromRemote) {
     rollBtn.disabled = true;
     diceEl.classList.add('rolling');
     promptText.textContent = "Rolling...";
-    
+
     if (!fromRemote) {
         currentRoll = Math.floor(Math.random() * 6) + 1;
         if (conn && gameMode.startsWith('online')) conn.send({ type: 'roll', value: currentRoll });
     }
-    
+
     setTimeout(() => {
         diceEl.classList.remove('rolling');
         let transformStr = "translateZ(-40px) ";
@@ -860,7 +907,7 @@ function triggerRollVisuals(fromRemote) {
         else if (currentRoll === 5) transformStr += "rotateX(90deg)";
         else if (currentRoll === 6) transformStr += "rotateY(180deg)";
         diceEl.style.transform = transformStr;
-        
+
         setTimeout(processRoll, 800);
     }, 800);
 }
@@ -912,10 +959,10 @@ function startMove(p, fromRemote) {
 
     promptText.textContent = "";
     movingPiece = p;
-    
+
     if (p.sq === 0) p.targetSq = 1;
     else p.targetSq = p.sq + currentRoll;
-    
+
     gameState = 'MOVING';
     p.animating = true;
     if (p.sq < p.targetSq) p.sq++;
@@ -924,7 +971,7 @@ function startMove(p, fromRemote) {
 canvas.addEventListener('click', (e) => {
     if (gameState !== 'AWAITING_SELECTION') return;
     if (gameMode.startsWith('online') && currentPlayerIdx !== myPlayerIdx) return;
-    
+
     let rect = canvas.getBoundingClientRect();
     let x = e.clientX - rect.left;
     let y = e.clientY - rect.top;
