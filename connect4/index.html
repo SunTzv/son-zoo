@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 4 - Play Against AI or P2P Multiplayer | Son.zoo</title>
+    <meta name="description" content="Play Connect 4 against a smart AI or connect with friends for peer-to-peer multiplayer. Watch out, the pieces might be plotting against you!">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://suntzv.github.io/connect4/">
+    <meta property="og:title" content="Connect 4 - Play Against AI or P2P Multiplayer | Son.zoo">
+    <meta property="og:description" content="Play Connect 4 against a smart AI or connect with friends for peer-to-peer multiplayer. Watch out, the pieces might be plotting against you!">
+    <meta property="og:image" content="https://suntzv.github.io/assets/cat.gif">
+    <!-- Neobrutalist font -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- PeerJS for P2P multiplayer -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+    <div class="container">
+        <header>
+            <h1>Connect 4</h1>
+            <p id="subtitle">The pieces are plotting against you...</p>
+        </header>
+
+        <!-- Main Menu -->
+        <div id="main-menu" class="panel">
+            <h2>Select Game Mode</h2>
+            <div class="menu-buttons">
+                <button id="btn-pve" class="primary-btn">PVE (vs AI)</button>
+                <button id="btn-hotseat" class="primary-btn">PVP Hotseat</button>
+                <button id="btn-online" class="primary-btn">Online Multiplayer</button>
+            </div>
+        </div>
+
+        <!-- Online Lobby -->
+        <div id="online-lobby" class="panel hidden">
+            <h2>Online Multiplayer</h2>
+            <div class="lobby-controls">
+                <div class="host-section">
+                    <h3>Host a Game</h3>
+                    <p>Share this code with your friend:</p>
+                    <div class="code-box">
+                        <span id="my-peer-id">Generating...</span>
+                        <button id="btn-copy-id" class="icon-btn">Copy</button>
+                    </div>
+                    <p id="host-status" class="status-text">Waiting for connection...</p>
+                </div>
+                <div class="divider">OR</div>
+                <div class="join-section">
+                    <h3>Join a Game</h3>
+                    <input type="text" id="join-peer-id" placeholder="Enter friend's code">
+                    <button id="btn-join" class="secondary-btn">Join Game</button>
+                    <p id="join-status" class="status-text"></p>
+                </div>
+            </div>
+            <button id="btn-back-from-lobby" class="text-btn">← Back to Menu</button>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area" class="hidden">
+            <div class="game-header">
+                <div class="turn-indicator">
+                    <span id="current-player-color" class="player-dot red"></span>
+                    <span id="turn-text">Red's Turn</span>
+                </div>
+                <div class="timer-container">
+                    <div class="timer-bar-bg">
+                        <div id="disappear-timer-bar" class="timer-bar-fill"></div>
+                    </div>
+                    <span class="timer-label">Chaos in: <span id="timer-text">13</span>s</span>
+                </div>
+            </div>
+
+            <div class="board-container">
+                <div id="board" class="board">
+                    <!-- Grid cells and pieces injected via JS -->
+                </div>
+            </div>
+
+            <div id="game-over-panel" class="game-over-overlay hidden">
+                <div class="game-over-content">
+                    <h2 id="winner-text">Red Wins!</h2>
+                    <button id="btn-rematch" class="primary-btn">Play Again</button>
+                    <button id="btn-menu" class="secondary-btn">Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
